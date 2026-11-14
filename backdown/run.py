@@ -108,8 +108,16 @@ async def main_async(args):
     if args.dry_run or not jobs:
         return
     ok = err = 0
+    # Limit conversations in flight per model, so each one finishes (and is saved) before new ones start.
+    conv_sems = {}
+
+    async def bounded(r, it, s, pb, p):
+        sem = conv_sems.setdefault(r.model_key, asyncio.Semaphore(r.concurrency))
+        async with sem:
+            return await run_one(r, it, templates, s, pb, args.variant, args.seed, params, client, p, hv)
+
     async with httpx.AsyncClient() as client:
-        tasks = [run_one(r, it, templates, s, pb, args.variant, args.seed, params, client, p, hv) for r, it, s, pb, p in jobs]
+        tasks = [bounded(r, it, s, pb, p) for r, it, s, pb, p in jobs]
         for fut in asyncio.as_completed(tasks):
             rec = await fut
             if rec["error"]:
