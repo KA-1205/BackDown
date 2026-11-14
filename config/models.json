@@ -20,7 +20,7 @@
     "gemini_flash":  [{"provider": "gemini", "model": "gemini-3.5-flash"}],
     "mistral_large": [{"provider": "mistral", "model": "mistral-large-2512"}, {"provider": "freellmapi", "model": "mistral-large-3"}],
     "gpt_oss":       [{"provider": "groq", "model": "openai/gpt-oss-120b"}, {"provider": "groq2", "model": "openai/gpt-oss-120b"}],
-    "qwen":          [{"provider": "groq", "model": "qwen/qwen3.8-27b"}, {"provider": "groq2", "model": "qwen/qwen3.8-27b"}]
+    "nemotron":      [{"provider": "nvidia", "model": "nvidia/nemotron-3-ultra-550b-a55b"}]
   },
   "graders": {
     "claude_haiku": [{"provider": "claude_cli", "model": "haiku"}],
@@ -28,7 +28,6 @@
     "deepseek":     [{"provider": "openrouter", "model": "deepseek/deepseek-v4.1-flash", "extra": {"reasoning": {"enabled": false}}}],
     "glm_oc":       [{"provider": "opencode_cli", "model": "opencode/glm-5.3-flash-free"}],
     "deepseek_oc":  [{"provider": "opencode_cli", "model": "opencode/deepseek-v4.1-flash-free"}],
-    "nemotron":     [{"provider": "openrouter", "model": "nvidia/nemotron-3-ultra-550b-a55b:free"}],
     "codex":        [{"provider": "codex_cli", "model": "gpt-5.4-mini"}]
   },
   "default_graders": ["claude_haiku", "glm", "deepseek"],
