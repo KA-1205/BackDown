@@ -7,7 +7,7 @@
     "groq2":      {"kind": "openai", "base_url": "https://api.groq.com/openai/v1", "key_env": "OPENCODE_GROQ_API_KEY", "concurrency": 2},
     "mistral":    {"kind": "openai", "base_url": "https://api.mistral.ai/v1", "key_env": "MISTRAL_API_KEY", "concurrency": 1},
     "nvidia":     {"kind": "openai", "base_url": "https://integrate.api.nvidia.com/v1", "key_env": "NVIDIA_NIM_API_KEY", "concurrency": 4},
-    "openrouter": {"kind": "openai", "base_url": "https://openrouter.ai/api/v1", "key_env": "OPENROUTER_API_KEY", "concurrency": 4,
+    "openrouter": {"kind": "openai", "base_url": "https://openrouter.ai/api/v1", "key_env": "OPENROUTER_API_KEY", "concurrency": 10,
                    "spend_stop_env": "OPENROUTER_STOP_AT_USD"},
     "claude_cli": {"kind": "cli", "key_env": null, "concurrency": 3, "prompt_via": "stdin",
                    "cmd": ["claude", "-p", "--model", "{model}", "--system-prompt", "{system}", "--tools", "", "--output-format", "text", "--no-session-persistence", "--strict-mcp-config", "--setting-sources", ""]},
@@ -19,7 +19,7 @@
   "subjects": {
     "gemini_flash":  [{"provider": "gemini", "model": "gemini-3.5-flash"}],
     "mistral_large": [{"provider": "mistral", "model": "mistral-large-2512"}, {"provider": "freellmapi", "model": "mistral-large-3"}],
-    "gpt_oss":       [{"provider": "groq", "model": "openai/gpt-oss-120b"}, {"provider": "groq2", "model": "openai/gpt-oss-120b"}],
+    "gpt_oss":       [{"provider": "openrouter", "model": "openai/gpt-oss-120b", "extra": {"provider": {"sort": "price"}, "reasoning": {"effort": "medium"}}}, {"provider": "groq", "model": "openai/gpt-oss-120b"}, {"provider": "groq2", "model": "openai/gpt-oss-120b"}],
     "nemotron":      [{"provider": "nvidia", "model": "nvidia/nemotron-3-ultra-550b-a55b"}]
   },
   "graders": {
