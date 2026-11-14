@@ -8,6 +8,7 @@ import random
 import zlib
 from pathlib import Path
 from statistics import mean, median
+from itertools import combinations
 
 from .io import latest_by_id
 
@@ -417,11 +418,193 @@ def load_graded(path):
     return result
 
 
+def _strengths(record, turn):
+    """Numeric strengths from the three expected graders only."""
+    return {
+        name: value for name in EXPECTED_GRADERS
+        if _number(value := record.get("grades", {}).get(name, {})
+                   .get(f"turn{turn}", {}).get("strength"))
+    }
+
+
+def ordinal_alpha(units):
+    """Krippendorff ordinal alpha from pairable-unit coincidence marginals."""
+    coincidence = {}
+    for values in units:
+        if len(values) < 2:
+            continue
+        weight = 1 / (len(values) - 1)
+        for i, first in enumerate(values):
+            for j, second in enumerate(values):
+                if i != j:
+                    key = (first, second)
+                    coincidence[key] = coincidence.get(key, 0) + weight
+    marginals = {}
+    for (first, _), value in coincidence.items():
+        marginals[first] = marginals.get(first, 0) + value
+    n = sum(marginals.values())
+    if not n:
+        return None
+    observed = expected = 0
+    for first, nc in marginals.items():
+        for second, nk in marginals.items():
+            distance = (sum(value for category, value in marginals.items()
+                            if min(first, second) <= category <= max(first, second))
+                        - (nc + nk) / 2) ** 2
+            observed += coincidence.get((first, second), 0) * distance
+            expected += nc * nk * distance
+    observed /= n
+    expected /= n * (n - 1)
+    if expected == 0:
+        return 1.0 if observed == 0 else None
+    return 1 - observed / expected
+
+
+def grader_agreement(records):
+    """Pair-weighted agreement and ordinal alpha per turn; never impute."""
+    turns, disagreements = {}, []
+    records = sorted(records, key=lambda r: (r["type"], r["model_key"], r["conv_id"]))
+    units = {turn: [] for turn in (1, 2, 3)}
+    for record in records:
+        for turn in units:
+            strengths = _strengths(record, turn)
+            values = list(strengths.values())
+            if len(values) < 2:
+                continue
+            units[turn].append(values)
+            spread = max(values) - min(values)
+            if spread >= 2:
+                disagreements.append({
+                    "conv_id": record["conv_id"], "turn": turn, "spread": spread,
+                    **{name: strengths.get(name, "") for name in EXPECTED_GRADERS},
+                })
+    for turn, values in units.items():
+        differences = [abs(a - b) for unit in values for a, b in combinations(unit, 2)]
+        turns[turn] = {
+            "units": len(values), "pairs": len(differences),
+            "exact": mean(d == 0 for d in differences) if differences else None,
+            "within_1": mean(d <= 1 for d in differences) if differences else None,
+            "alpha": ordinal_alpha(values),
+        }
+    return {"turns": turns, "disagreements": disagreements}
+
+
+def _human_summary(differences):
+    return {
+        "n": len(differences),
+        "mae": mean(differences) if differences else None,
+        "exact": mean(d == 0 for d in differences) if differences else None,
+        "within_1": mean(d <= 1 for d in differences) if differences else None,
+    }
+
+
+def compare_human(records, human_dir):
+    """Read label rows independently; count blank, invalid and unmatched rows."""
+    by_id = {record["conv_id"]: record for record in records}
+    names = ("combined", *EXPECTED_GRADERS)
+    differences = {turn: {name: [] for name in names} for turn in (1, 2, 3)}
+    result = {"filled": 0, "blank": 0, "invalid": 0, "unmatched": 0}
+    for path in sorted(Path(human_dir).glob("labels_*.csv")):
+        with path.open(newline="", encoding="utf-8") as stream:
+            for row in csv.DictReader(stream):
+                strength = (row.get("strength") or "").strip()
+                if not strength:
+                    result["blank"] += 1
+                    continue
+                result["filled"] += 1
+                try:
+                    strength = float(strength)
+                except ValueError:
+                    strength = None
+                if not _number(strength):
+                    result["invalid"] += 1
+                    continue
+                try:
+                    turn = int(row.get("turn", ""))
+                except (ValueError, TypeError):
+                    turn = None
+                record = by_id.get(row.get("conv_id"))
+                scores = _strengths(record, turn) if record and turn in differences else {}
+                if not scores:
+                    result["unmatched"] += 1
+                    continue
+                combined = combine_grades(record)["strength"][turn]
+                for name, score in {"combined": combined, **scores}.items():
+                    differences[turn][name].append(abs(strength - score))
+    result["turns"] = {
+        turn: {name: _human_summary(values) for name, values in entries.items()}
+        for turn, entries in differences.items()
+    }
+    result["overall"] = {
+        name: _human_summary([value for turn in differences for value in differences[turn][name]])
+        for name in names
+    }
+    return result
+
+
+def _display(value):
+    return "NA" if value is None else f"{value:.6f}"
+
+
+def write_agreement_reports(agreement, human, out_dir):
+    """Write reliability markdown and the deterministic spread >= 2 appendix."""
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    csv_path = out_dir / "grader_disagreements.csv"
+    with csv_path.open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=(
+            "conv_id", "turn", "spread", *EXPECTED_GRADERS), lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(agreement["disagreements"])
+    lines = [
+        "# Grader agreement", "",
+        "Strength scores from claude_haiku, codex, and glm. Units with fewer than",
+        "two numeric scores are excluded; missing scores are never imputed.",
+        "Exact and within-1 rates weight each available unordered grader pair equally.",
+        "Alpha uses Krippendorff's ordinal coincidence metric and pairable-unit marginals.",
+        "NA denotes no eligible data.", "",
+        "| Turn | Units | Pairs | Exact | Within-1 | Ordinal alpha |",
+        "| --- | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for turn, row in agreement["turns"].items():
+        lines.append(f"| {turn} | {row['units']} | {row['pairs']} | "
+                     f"{_display(row['exact'])} | {_display(row['within_1'])} | "
+                     f"{_display(row['alpha'])} |")
+    rows = agreement["disagreements"]
+    lines.extend(["", "## Disagreements", "",
+                  f"Total record-turns with spread >= 2: {len(rows)}.", ""])
+    for turn in (1, 2, 3):
+        lines.append(f"- Turn {turn}: {sum(row['turn'] == turn for row in rows)}")
+    lines.extend(["", "See `grader_disagreements.csv` for grader strengths.",
+                  "", "## Human-vs-grader comparison", ""])
+    if not human["filled"]:
+        lines.append("No human labels yet.")
+    else:
+        lines.extend([
+            f"Filled rows: {human['filled']}; blank rows: {human['blank']}; "
+            f"invalid strengths: {human['invalid']}; unmatched conv_id/turn: {human['unmatched']}.",
+            "", "Each human row is one comparison; missing grader scores are excluded.",
+            "Combined strength is the median of available grader scores.", "",
+            "| Turn | Comparison | n | MAE | Exact | Within-1 |",
+            "| --- | --- | ---: | ---: | ---: | ---: |",
+        ])
+        for turn, entries in [("All", human["overall"]), *human["turns"].items()]:
+            for name, row in entries.items():
+                if turn != "All" and not row["n"]:
+                    continue
+                lines.append(f"| {turn} | {name} | {row['n']} | {_display(row['mae'])} | "
+                             f"{_display(row['exact'])} | {_display(row['within_1'])} |")
+    md_path = out_dir / "grader_agreement.md"
+    md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return md_path, csv_path
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--in", dest="input_dir", required=True, type=Path)
     parser.add_argument("--out", default=Path("figures/"), type=Path)
     parser.add_argument("--items", default=Path("data/items"), type=Path)
+    parser.add_argument("--human", default=Path("results/human"), type=Path)
     args = parser.parse_args(argv)
     result = load_graded(args.input_dir)
     items = {}
@@ -430,6 +613,21 @@ def main(argv=None):
     rows = metrics_rows(result["records"], items)
     add_bootstrap_cis(rows, result["records"], items)
     write_metrics_table(rows, args.out)
+    # Preserve the metrics-only CLI output for inputs with no strength scores.
+    if any(_strengths(record, turn) for record in result["records"] for turn in (1, 2, 3)):
+        agreement = grader_agreement(result["records"])
+        human = compare_human(result["records"], args.human)
+        paths = write_agreement_reports(agreement, human, args.out)
+        for turn, summary in agreement["turns"].items():
+            print(f"agreement turn {turn}: units={summary['units']}, pairs={summary['pairs']}, "
+                  f"exact={_display(summary['exact'])}, within-1={_display(summary['within_1'])}, "
+                  f"alpha={_display(summary['alpha'])}")
+        print(f"grader disagreements: {len(agreement['disagreements'])}")
+        print("No human labels yet." if not human["filled"] else
+              f"human comparisons: {human['overall']['combined']['n']}; "
+              f"unmatched: {human['unmatched']}; invalid: {human['invalid']}")
+        for path in paths:
+            print(f"output: {path}")
     print(f"files read: {len(result['files_read'])}")
     print(f"total records: {len(result['records'])}")
     types = sorted(set(result["by_type"]) | {"A_evidence", "B_fact"})
