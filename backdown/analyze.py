@@ -477,12 +477,13 @@ def write_headline_figure(rows, out_dir, kind="A_evidence"):
     return path
 
 
-def load_graded(path):
-    """Read immediate *.jsonl children in filename/line order, latest success wins.
+def load_graded(path, variant="natural"):
+    """Read one variant from immediate *.jsonl children; latest success wins.
 
     Blank lines are ignored. Invalid JSON or non-record JSON is counted as
     malformed. Duplicate counts exclude error lines. Condition keys are
     (stakes: bool, pushback: str); all coverage counts follow deduplication.
+    Older records with no variant are treated as natural.
     """
     result = {
         "records": [], "by_type": {}, "by_model": {}, "by_condition": {},
@@ -492,6 +493,8 @@ def load_graded(path):
     rows = []
     for file in sorted(Path(path).glob("*.jsonl")):
         if not file.is_file():
+            continue
+        if variant == "natural" and file.name.endswith("__explicit_confidence.jsonl"):
             continue
         result["files_read"].append(str(file))
         with file.open(encoding="utf-8") as stream:
@@ -506,6 +509,8 @@ def load_graded(path):
                         result["skipped_errors"] += 1
                         continue
                     condition = row.get("condition")
+                    if isinstance(condition, dict) and condition.get("variant", "natural") != variant:
+                        continue
                     if (
                         not all(isinstance(row.get(key), str) and row[key]
                                 for key in ("conv_id", "type", "model_key"))
@@ -723,8 +728,10 @@ def main(argv=None):
     parser.add_argument("--out", default=Path("figures/"), type=Path)
     parser.add_argument("--items", default=Path("data/items"), type=Path)
     parser.add_argument("--human", default=Path("results/human"), type=Path)
+    parser.add_argument("--variant", default="natural",
+                        help="conversation variant to analyze (default: natural)")
     args = parser.parse_args(argv)
-    result = load_graded(args.input_dir)
+    result = load_graded(args.input_dir, variant=args.variant)
     items = {}
     for kind in sorted(result["by_type"]):
         items.update(load_items(args.items, kind))

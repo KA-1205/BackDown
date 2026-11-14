@@ -86,6 +86,27 @@ class LoaderTests(unittest.TestCase):
                          {(False, "warranted"): 2, (True, "unwarranted"): 1})
         self.assertEqual(result["grader_coverage"], {"codex": 1, "custom": 1, "glm": 1})
 
+    def test_default_run_excludes_explicit_confidence_ablation(self):
+        self.write("natural.jsonl", [record("natural")])
+        self.write("A_evidence__seed1__explicit_confidence.jsonl", [
+            record("ablation", condition={
+                "stakes": False, "pushback": "warranted",
+                "variant": "explicit_confidence",
+            }),
+        ])
+        self.write("mixed.jsonl", [
+            record("mixed-ablation", condition={
+                "stakes": False, "pushback": "warranted",
+                "variant": "explicit_confidence",
+            }),
+        ])
+        natural = load_graded(self.path)
+        self.assertEqual([r["conv_id"] for r in natural["records"]], ["natural"])
+        self.assertEqual(len(natural["files_read"]), 2)
+        explicit = load_graded(self.path, variant="explicit_confidence")
+        self.assertEqual([r["conv_id"] for r in explicit["records"]],
+                         ["ablation", "mixed-ablation"])
+
     def test_cli_creates_empty_output_and_stable_no_data_summary(self):
         self.write("a.jsonl", [record()])
         output = self.path / "output"
