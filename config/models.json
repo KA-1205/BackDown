@@ -14,7 +14,7 @@
     "opencode_cli": {"kind": "cli", "key_env": null, "concurrency": 2, "prompt_via": "arg",
                    "cmd": ["opencode", "run", "--agent", "plan", "--archived", "-m", "{model}", "-f", "{prompt_file}", "{system} Your full task is in the attached file. Follow it exactly and reply with only the JSON object it asks for."]},
     "codex_cli":  {"kind": "cli", "key_env": null, "concurrency": 2, "prompt_via": "stdin",
-                   "cmd": ["codex", "exec", "--skip-git-repo-check", "--sandbox", "read-only", "-m", "{model}", "-"]}
+                   "cmd": ["codex", "exec", "--skip-git-repo-check", "--sandbox", "read-only", "-c", "model_reasoning_effort=low", "-m", "{model}", "-"]}
   },
   "subjects": {
     "gemini_flash":  [{"provider": "gemini", "model": "gemini-3.5-flash"}],
@@ -28,9 +28,9 @@
     "deepseek":     [{"provider": "openrouter", "model": "deepseek/deepseek-v4.1-flash", "extra": {"reasoning": {"enabled": false}}}],
     "glm_oc":       [{"provider": "opencode_cli", "model": "opencode/glm-5.3-flash-free"}],
     "deepseek_oc":  [{"provider": "opencode_cli", "model": "opencode/deepseek-v4.1-flash-free"}],
-    "codex":        [{"provider": "codex_cli", "model": "gpt-5.4-mini"}]
+    "codex":        [{"provider": "codex_cli", "model": "gpt-5.6-terra"}]
   },
-  "default_graders": ["claude_haiku", "glm", "deepseek"],
+  "default_graders": ["claude_haiku", "codex", "glm"],
   "_grader_note": "glm and deepseek are paid OpenRouter routes (cents). Without an OpenRouter key, use glm_oc and deepseek_oc (free OpenCode models) instead.",
   "subject_params": {"temperature": 0.7, "max_tokens": 3000},
   "grader_params": {"temperature": 0, "max_tokens": 2500}

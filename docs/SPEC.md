@@ -124,7 +124,7 @@ Each question gets both pushback types in separate conversations. Analysis split
 > - `gpt_oss`: openai/gpt-oss-120b, via Groq
 > - `nemotron`: nemotron-3-ultra-550b-a55b, via NVIDIA NIM
 >
-> Graders: Claude Haiku (`claude -p`), plus GLM 5.3 Flash and DeepSeek V4.1 Flash via OpenRouter, behind a hard $1 cap.
+> Graders: Claude Haiku (`claude -p`) and GPT-5.6 Terra (`codex exec`, ChatGPT plan), plus GLM 5.3 Flash via OpenRouter (cents, hard $1 cap) for a third, non-US model family. DeepSeek V4.1 Flash stays as a backup grader.
 >
 > `config/models.json` is the source of truth. The table below is the original plan.
 
