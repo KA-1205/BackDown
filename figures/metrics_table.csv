@@ -6,6 +6,8 @@ A_evidence,gemini_lite,plain,unwarranted,probe_retreat,0.325,,,40,40
 A_evidence,gemini_lite,plain,unwarranted,capitulation,0.6818181818181818,,,22,22
 A_evidence,gemini_lite,plain,warranted,overselling,1.65,,,40,40
 A_evidence,gemini_lite,plain,warranted,probe_retreat,0.2,,,40,40
+A_evidence,gemini_lite,plain,warranted_minus_unwarranted,discrimination,-1.0958333333333332,,,62,32
+A_evidence,gemini_lite,plain,warranted_minus_unwarranted,discrimination_paired,-0.9666666666666667,,,30,30
 A_evidence,gemini_lite,stakes,both,overselling,1.5,,,80,40
 A_evidence,gemini_lite,stakes,both,probe_retreat,-0.225,,,80,40
 A_evidence,gemini_lite,stakes,unwarranted,overselling,1.525,,,40,40
@@ -13,6 +15,8 @@ A_evidence,gemini_lite,stakes,unwarranted,probe_retreat,-0.25,,,40,40
 A_evidence,gemini_lite,stakes,unwarranted,capitulation,0.3333333333333333,,,27,27
 A_evidence,gemini_lite,stakes,warranted,overselling,1.475,,,40,40
 A_evidence,gemini_lite,stakes,warranted,probe_retreat,-0.2,,,40,40
+A_evidence,gemini_lite,stakes,warranted_minus_unwarranted,discrimination,-0.75,,,64,33
+A_evidence,gemini_lite,stakes,warranted_minus_unwarranted,discrimination_paired,-0.7741935483870968,,,31,31
 A_evidence,gpt_oss,plain,both,overselling,1.675,,,80,40
 A_evidence,gpt_oss,plain,both,probe_retreat,0.2875,,,80,40
 A_evidence,gpt_oss,plain,unwarranted,overselling,1.675,,,40,40
@@ -20,6 +24,8 @@ A_evidence,gpt_oss,plain,unwarranted,probe_retreat,0.45,,,40,40
 A_evidence,gpt_oss,plain,unwarranted,capitulation,0.13636363636363635,,,22,22
 A_evidence,gpt_oss,plain,warranted,overselling,1.675,,,40,40
 A_evidence,gpt_oss,plain,warranted,probe_retreat,0.125,,,40,40
+A_evidence,gpt_oss,plain,warranted_minus_unwarranted,discrimination,-0.6304985337243402,,,64,34
+A_evidence,gpt_oss,plain,warranted_minus_unwarranted,discrimination_paired,-0.5666666666666667,,,30,30
 A_evidence,gpt_oss,stakes,both,overselling,1.3125,,,80,40
 A_evidence,gpt_oss,stakes,both,probe_retreat,0.0,,,80,40
 A_evidence,gpt_oss,stakes,unwarranted,overselling,1.375,,,40,40
@@ -27,6 +33,8 @@ A_evidence,gpt_oss,stakes,unwarranted,probe_retreat,-0.05,,,40,40
 A_evidence,gpt_oss,stakes,unwarranted,capitulation,0.07692307692307693,,,26,26
 A_evidence,gpt_oss,stakes,warranted,overselling,1.25,,,40,40
 A_evidence,gpt_oss,stakes,warranted,probe_retreat,0.05,,,40,40
+A_evidence,gpt_oss,stakes,warranted_minus_unwarranted,discrimination,-0.07557603686635944,,,66,35
+A_evidence,gpt_oss,stakes,warranted_minus_unwarranted,discrimination_paired,-0.06451612903225806,,,31,31
 A_evidence,mistral_large,plain,both,overselling,1.45,,,80,40
 A_evidence,mistral_large,plain,both,probe_retreat,-0.0125,,,80,40
 A_evidence,mistral_large,plain,unwarranted,overselling,1.5,,,40,40
@@ -34,6 +42,8 @@ A_evidence,mistral_large,plain,unwarranted,probe_retreat,-0.025,,,40,40
 A_evidence,mistral_large,plain,unwarranted,capitulation,0.6521739130434783,,,23,23
 A_evidence,mistral_large,plain,warranted,overselling,1.4,,,40,40
 A_evidence,mistral_large,plain,warranted,probe_retreat,0.0,,,40,40
+A_evidence,mistral_large,plain,warranted_minus_unwarranted,discrimination,-0.7999999999999999,,,60,30
+A_evidence,mistral_large,plain,warranted_minus_unwarranted,discrimination_paired,-0.8,,,30,30
 A_evidence,mistral_large,stakes,both,overselling,1.275,,,80,40
 A_evidence,mistral_large,stakes,both,probe_retreat,-0.175,,,80,40
 A_evidence,mistral_large,stakes,unwarranted,overselling,1.275,,,40,40
@@ -41,6 +51,8 @@ A_evidence,mistral_large,stakes,unwarranted,probe_retreat,-0.175,,,40,40
 A_evidence,mistral_large,stakes,unwarranted,capitulation,0.2692307692307692,,,26,26
 A_evidence,mistral_large,stakes,warranted,overselling,1.275,,,40,40
 A_evidence,mistral_large,stakes,warranted,probe_retreat,-0.175,,,40,40
+A_evidence,mistral_large,stakes,warranted_minus_unwarranted,discrimination,-0.68125,,,62,33
+A_evidence,mistral_large,stakes,warranted_minus_unwarranted,discrimination_paired,-0.6206896551724138,,,29,29
 A_evidence,nemotron,plain,both,overselling,1.8375,,,80,40
 A_evidence,nemotron,plain,both,probe_retreat,0.3625,,,80,40
 A_evidence,nemotron,plain,unwarranted,overselling,1.875,,,40,40
@@ -48,6 +60,8 @@ A_evidence,nemotron,plain,unwarranted,probe_retreat,0.425,,,40,40
 A_evidence,nemotron,plain,unwarranted,capitulation,0.36363636363636365,,,22,22
 A_evidence,nemotron,plain,warranted,overselling,1.8,,,40,40
 A_evidence,nemotron,plain,warranted,probe_retreat,0.3,,,40,40
+A_evidence,nemotron,plain,warranted_minus_unwarranted,discrimination,-0.6801470588235294,,,66,35
+A_evidence,nemotron,plain,warranted_minus_unwarranted,discrimination_paired,-0.6129032258064516,,,31,31
 A_evidence,nemotron,stakes,both,overselling,1.5625,,,80,40
 A_evidence,nemotron,stakes,both,probe_retreat,-0.1625,,,80,40
 A_evidence,nemotron,stakes,unwarranted,overselling,1.625,,,40,40
@@ -55,6 +69,8 @@ A_evidence,nemotron,stakes,unwarranted,probe_retreat,-0.175,,,40,40
 A_evidence,nemotron,stakes,unwarranted,capitulation,0.375,,,24,24
 A_evidence,nemotron,stakes,warranted,overselling,1.5,,,40,40
 A_evidence,nemotron,stakes,warranted,probe_retreat,-0.15,,,40,40
+A_evidence,nemotron,stakes,warranted_minus_unwarranted,discrimination,-0.8585858585858586,,,69,36
+A_evidence,nemotron,stakes,warranted_minus_unwarranted,discrimination_paired,-0.8484848484848485,,,33,33
 A_evidence,gemini_lite,stakes_minus_plain,both,overselling,-0.175,,,40,40
 A_evidence,gemini_lite,stakes_minus_plain,both,probe_retreat,-0.4875,,,40,40
 A_evidence,gemini_lite,stakes_minus_plain,unwarranted,overselling,-0.175,,,40,40

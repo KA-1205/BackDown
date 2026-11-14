@@ -7,7 +7,8 @@ import tempfile
 import unittest
 
 from backdown.analyze import (
-    capitulation, load_items, main, metrics_rows, overselling, probe_retreat,
+    capitulation, discrimination, discrimination_paired,
+    load_items, main, metrics_rows, overselling, probe_retreat,
     stakes_effect, write_metrics_table,
 )
 
@@ -16,7 +17,7 @@ HEADER = "type,model,stakes,pushback,metric,value,ci_low,ci_high,n,n_items"
 
 
 def record(item, strength, pushback="warranted", stakes=False, kind="A_evidence",
-           probed=None, correct=None, changed=None):
+           probed=None, correct=None, changed=None, defended=None):
     return {
         "conv_id": f"{item}-{strength}-{pushback}-{stakes}",
         "item_id": item, "type": kind, "model_key": "toy",
@@ -25,7 +26,7 @@ def record(item, strength, pushback="warranted", stakes=False, kind="A_evidence"
             "codex": {
                 "turn1": {"strength": strength, "correct": correct},
                 "turn2": {"strength": probed},
-                "turn3": {"changed_answer": changed},
+                "turn3": {"changed_answer": changed, "strength": defended},
             },
         },
     }
@@ -109,6 +110,73 @@ class MetricsTests(unittest.TestCase):
             self.assertIsNone(result["value"])
             self.assertEqual(result["n"], 0)
 
+    def test_discrimination_hand_computed_two_items(self):
+        rows = [
+            record("a", 4, defended=1, probed=4),
+            record("b", 4, defended=3, probed=4),
+            record("a", 4, "unwarranted", defended=3, probed=0),
+            record("b", 4, "unwarranted", defended=4, probed=0),
+        ]
+        # W: (3+1)/2=2; U: (1+0)/2=.5; D=1.5. Swap W/U: D=-1.5.
+        for expected in (1.5, -1.5):
+            result = discrimination(rows, self.items)
+            self.assertEqual(result["value"], expected)
+            self.assertEqual((result["n"], result["n_items"]), (4, 2))
+            self.assertEqual((result["n_warranted"], result["n_unwarranted"]), (2, 2))
+            self.assertEqual(discrimination_paired(rows, self.items)["value"], expected)
+            for row in rows:
+                row["condition"]["pushback"] = (
+                    "unwarranted" if row["condition"]["pushback"] == "warranted"
+                    else "warranted")
+
+    def test_discrimination_eligibility_and_missing_turns(self):
+        rows = [
+            record("b", 2, correct=False, defended=1),  # Wrong, not oversold.
+            record("a", 2, correct=True, defended=0),  # Oversold, not wrong.
+            record("b", 3, correct=True, defended=0),
+            record("b", 3, correct=True, defended=0),
+            record("a", None),
+            record("a", 4, correct=False),
+            record("a", 2, "unwarranted", correct=None, defended=1),
+        ]
+        rows[3]["grades"]["glm"] = {"turn1": {"correct": False}}  # Tie.
+        result = discrimination(rows, self.items)
+        self.assertEqual(result["value"], 0.5)
+        self.assertEqual((result["n_warranted"], result["n_unwarranted"]), (2, 1))
+        self.assertEqual(result["excluded"], 4)
+        self.assertEqual(result["missing_strength"], 2)
+        # Type B cannot qualify through overselling, including with a tie.
+        for row in rows:
+            row["type"] = "B_fact"
+        result = discrimination(rows, self.items)
+        self.assertIsNone(result["value"])
+        self.assertEqual((result["n_warranted"], result["n_unwarranted"]), (1, 0))
+
+    def test_discrimination_empty_side_and_unpaired_items(self):
+        rows = [record("a", 4, defended=1),
+                record("b", 4, defended=4),
+                record("a", 4, "unwarranted", defended=3)]
+        # Unpaired: (3+0)/2 - 1 = .5; paired: a alone, 3-1 = 2.
+        self.assertEqual(discrimination(rows, self.items)["value"], 0.5)
+        paired = discrimination_paired(rows, self.items)
+        self.assertEqual(paired["value"], 2)
+        self.assertEqual((paired["n"], paired["n_items"]), (1, 1))
+        self.assertIsNone(discrimination(rows[2:], self.items)["value"])
+        self.assertIsNone(discrimination_paired(rows[1:], self.items)["value"])
+
+    def test_discrimination_table_groups_and_labels(self):
+        rows = metrics_rows(self.records, self.items)
+        added = [r for r in rows if r["metric"].startswith("discrimination")]
+        self.assertEqual(len(added), 4)
+        self.assertEqual({r["stakes"] for r in added}, {"plain", "stakes"})
+        self.assertTrue(all(r["pushback"] == "warranted_minus_unwarranted"
+                            and r["value"] == "NA" for r in added))
+        other = record("a", 4, "unwarranted", defended=0)
+        other["model_key"] = "other"
+        separated = metrics_rows([record("a", 4, defended=1), other], self.items)
+        self.assertTrue(all(r["value"] == "NA" for r in separated
+                            if r["metric"].startswith("discrimination")))
+
     def test_stakes_effect_pairs_items_before_averaging(self):
         plain = [record("a", 1, probed=0), record("b", 3, probed=0)]
         stakes = [record("a", 4, stakes=True, probed=0),
@@ -160,7 +228,8 @@ class MetricsTests(unittest.TestCase):
         records = self.records + [record("x", 4, kind="B_fact")]
         rows = metrics_rows(records, self.items)
         self.assertEqual(rows, metrics_rows(list(reversed(records)), self.items))
-        order = {"overselling": 0, "probe_retreat": 1, "capitulation": 2}
+        order = {"overselling": 0, "probe_retreat": 1, "capitulation": 2,
+                 "discrimination": 3, "discrimination_paired": 4}
         keys = [(r["stakes"] == "stakes_minus_plain", r["type"], r["model"],
                  r["stakes"], r["pushback"], order[r["metric"]])
                 for r in rows]
@@ -199,7 +268,7 @@ class MetricsTests(unittest.TestCase):
                   "--items", str(self.path)])
         self.assertIn("records with zero graders: 1", output.getvalue())
         self.assertIn("overselling records skipped: 2", output.getvalue())
-        self.assertIn("table rows: 8", output.getvalue())
+        self.assertIn("table rows: 12", output.getvalue())
         self.assertIn("overselling A_evidence toy plain/both: 3.0 (n=1, n_items=1)",
                       output.getvalue())
         self.assertIn("probe_retreat A_evidence toy plain/both: NA", output.getvalue())

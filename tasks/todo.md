@@ -34,10 +34,11 @@ Owner: GPT-6 Astra (implement) / BigPickle (orchestration, git, verification)
 - [x] Commit + push
 
 ## Increment 4 — Discrimination
-- [ ] warranted retreat − unwarranted retreat on wrong/oversold turn-1
-- [ ] paired-by-item sensitivity variant
-- [ ] `tests/test_metrics.py` toy set with known sign
-- [ ] Commit + push
+- [x] warranted retreat − unwarranted retreat on wrong/oversold turn-1
+- [x] paired-by-item sensitivity variant
+- [x] `tests/test_metrics.py` toy set with known sign
+- [x] All 100 table rows independently recomputed (value, n, n_items); deleting the 16 new rows reproduces the previous CSV byte-for-byte
+- [x] Commit + push
 
 ## Increment 5 — Bootstrap CIs
 - [ ] item-level cluster bootstrap, 1,000 resamples, seed `12345`, 95% percentile
