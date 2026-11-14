@@ -24,6 +24,8 @@ class Route:
     base_url: str | None
     key_env: str | None
     concurrency: int
+    extra: dict | None = None
+    spend_stop_env: str | None = None
 
     @property
     def api_key(self) -> str | None:
@@ -57,6 +59,8 @@ def resolve(model_key: str, section: str, force_provider: str | None = None) -> 
                 base_url=p.get("base_url"),
                 key_env=p.get("key_env"),
                 concurrency=p.get("concurrency", 2),
+                extra=r.get("extra"),
+                spend_stop_env=p.get("spend_stop_env"),
             )
     raise SystemExit(f"No usable route for '{model_key}': set one of the key variables for {[r['provider'] for r in routes]}")
 

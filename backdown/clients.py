@@ -3,6 +3,7 @@ CLI tools (claude -p, opencode run, codex exec) are allowed only as graders."""
 
 import asyncio
 import json
+import os
 import random
 import re
 import shutil
@@ -45,10 +46,36 @@ async def chat(route: Route, messages: list[dict], *, temperature: float, max_to
         raise ValueError(f"Unknown provider kind {route.kind}")
 
 
+class SpendCapReached(RuntimeError):
+    pass
+
+
+_spend = {"calls": 0, "usage": None}
+_spend_lock = asyncio.Lock()
+
+
+async def _check_spend(route: Route, client: httpx.AsyncClient) -> None:
+    """Hard spend cap for paid routes. The env var holds the key's total usage (USD) at which to stop.
+    OpenRouter reports total key usage at /api/v1/key; we re-check every 10 calls."""
+    stop_at = os.environ.get(route.spend_stop_env or "")
+    if not stop_at:
+        return
+    async with _spend_lock:
+        if _spend["usage"] is None or _spend["calls"] % 10 == 0:
+            r = await client.get(route.base_url.rstrip("/") + "/key",
+                                 headers={"Authorization": f"Bearer {route.api_key}"}, timeout=30)
+            _spend["usage"] = float(r.json()["data"]["usage"])
+        _spend["calls"] += 1
+        if _spend["usage"] >= float(stop_at):
+            raise SpendCapReached(f"SPEND CAP: key usage ${_spend['usage']:.4f} >= stop-at ${stop_at}")
+
+
 async def _chat_openai(route, messages, temperature, max_tokens, client, max_attempts) -> Reply:
+    await _check_spend(route, client)
     url = route.base_url.rstrip("/") + "/chat/completions"
     headers = {"Authorization": f"Bearer {route.api_key}", "Content-Type": "application/json"}
-    body = {"model": route.model, "messages": messages, "temperature": temperature, "max_tokens": max_tokens}
+    body = {"model": route.model, "messages": messages, "temperature": temperature, "max_tokens": max_tokens,
+            **(route.extra or {})}
     last_err = None
     for attempt in range(1, max_attempts + 1):
         t0 = time.perf_counter()
@@ -98,7 +125,12 @@ def _clean_cli(raw: str) -> str:
 async def _chat_cli(route: Route, messages, max_attempts) -> Reply:
     p = load_config()["providers"][route.provider]
     system, prompt = _flatten(messages)
-    subs = {"model": route.model, "system": system or "You are a careful grader.", "prompt": prompt}
+    # Long prompts exceed the Windows command-line limit, so CLIs that take an attachment get a file.
+    fd, prompt_file = tempfile.mkstemp(suffix=".md", dir=_SANDBOX, text=True)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(prompt)
+    subs = {"model": route.model, "system": system or "You are a careful grader.", "prompt": prompt,
+            "prompt_file": prompt_file}
     cmd = [part.format(**subs) if "{" in part else part for part in p["cmd"]]
     exe = shutil.which(cmd[0])
     if exe is None:

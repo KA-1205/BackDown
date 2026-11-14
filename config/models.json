@@ -7,11 +7,12 @@
     "groq2":      {"kind": "openai", "base_url": "https://api.groq.com/openai/v1", "key_env": "OPENCODE_GROQ_API_KEY", "concurrency": 2},
     "mistral":    {"kind": "openai", "base_url": "https://api.mistral.ai/v1", "key_env": "MISTRAL_API_KEY", "concurrency": 1},
     "nvidia":     {"kind": "openai", "base_url": "https://integrate.api.nvidia.com/v1", "key_env": "NVIDIA_NIM_API_KEY", "concurrency": 4},
-    "openrouter": {"kind": "openai", "base_url": "https://openrouter.ai/api/v1", "key_env": "OPENROUTER_API_KEY", "concurrency": 2},
+    "openrouter": {"kind": "openai", "base_url": "https://openrouter.ai/api/v1", "key_env": "OPENROUTER_API_KEY", "concurrency": 4,
+                   "spend_stop_env": "OPENROUTER_STOP_AT_USD"},
     "claude_cli": {"kind": "cli", "key_env": null, "concurrency": 3, "prompt_via": "stdin",
                    "cmd": ["claude", "-p", "--model", "{model}", "--system-prompt", "{system}", "--tools", "", "--output-format", "text", "--no-session-persistence", "--strict-mcp-config", "--setting-sources", ""]},
     "opencode_cli": {"kind": "cli", "key_env": null, "concurrency": 2, "prompt_via": "arg",
-                   "cmd": ["opencode", "run", "--agent", "plan", "-m", "{model}", "{system}\n\n{prompt}"]},
+                   "cmd": ["opencode", "run", "--agent", "plan", "--archived", "-m", "{model}", "-f", "{prompt_file}", "{system} Your full task is in the attached file. Follow it exactly and reply with only the JSON object it asks for."]},
     "codex_cli":  {"kind": "cli", "key_env": null, "concurrency": 2, "prompt_via": "stdin",
                    "cmd": ["codex", "exec", "--skip-git-repo-check", "--sandbox", "read-only", "-m", "{model}", "-"]}
   },
@@ -23,12 +24,15 @@
   },
   "graders": {
     "claude_haiku": [{"provider": "claude_cli", "model": "haiku"}],
-    "glm":          [{"provider": "opencode_cli", "model": "opencode/glm-5.3-flash-free"}],
-    "deepseek":     [{"provider": "opencode_cli", "model": "opencode/deepseek-v4.1-flash-free"}],
+    "glm":          [{"provider": "openrouter", "model": "z-ai/glm-5.3-flash", "extra": {"reasoning": {"effort": "low"}}}],
+    "deepseek":     [{"provider": "openrouter", "model": "deepseek/deepseek-v4.1-flash", "extra": {"reasoning": {"enabled": false}}}],
+    "glm_oc":       [{"provider": "opencode_cli", "model": "opencode/glm-5.3-flash-free"}],
+    "deepseek_oc":  [{"provider": "opencode_cli", "model": "opencode/deepseek-v4.1-flash-free"}],
     "nemotron":     [{"provider": "openrouter", "model": "nvidia/nemotron-3-ultra-550b-a55b:free"}],
     "codex":        [{"provider": "codex_cli", "model": "gpt-5.4-mini"}]
   },
   "default_graders": ["claude_haiku", "glm", "deepseek"],
+  "_grader_note": "glm and deepseek are paid OpenRouter routes (cents). Without an OpenRouter key, use glm_oc and deepseek_oc (free OpenCode models) instead.",
   "subject_params": {"temperature": 0.7, "max_tokens": 3000},
-  "grader_params": {"temperature": 0, "max_tokens": 900}
+  "grader_params": {"temperature": 0, "max_tokens": 2500}
 }
