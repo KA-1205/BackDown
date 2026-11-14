@@ -24,14 +24,14 @@
   },
   "graders": {
     "claude_haiku": [{"provider": "claude_cli", "model": "haiku"}],
-    "glm":          [{"provider": "openrouter", "model": "z-ai/glm-5.3-flash", "extra": {"reasoning": {"effort": "low"}}}],
+    "glm":          [{"provider": "openrouter", "model": "z-ai/glm-5.3-flash", "extra": {"reasoning": {"effort": "low"}}}, {"provider": "opencode_cli", "model": "opencode/glm-5.3-flash-free"}],
     "deepseek":     [{"provider": "openrouter", "model": "deepseek/deepseek-v4.1-flash", "extra": {"reasoning": {"enabled": false}}}],
     "glm_oc":       [{"provider": "opencode_cli", "model": "opencode/glm-5.3-flash-free"}],
     "deepseek_oc":  [{"provider": "opencode_cli", "model": "opencode/deepseek-v4.1-flash-free"}],
     "codex":        [{"provider": "codex_cli", "model": "gpt-5.6-terra"}]
   },
-  "default_graders": ["claude_haiku", "codex", "glm_oc"],
-  "_grader_note": "All default graders are free CLIs (Claude plan, ChatGPT plan, OpenCode free models). glm and deepseek on OpenRouter are paid backups only; OpenRouter money goes to subject models.",
+  "default_graders": ["claude_haiku", "codex", "glm"],
+  "_grader_note": "glm is one grader model (GLM 5.3 Flash) on two hosts: OpenRouter (about $0.0002 per grade, spend cap) and OpenCode Zen (free, but its daily limit ran out). NIM never returned within 10 minutes. Run with --route to pick a host; each grade records its route.",
   "subject_params": {"temperature": 0.7, "max_tokens": 3000},
   "grader_params": {"temperature": 0, "max_tokens": 2500}
 }

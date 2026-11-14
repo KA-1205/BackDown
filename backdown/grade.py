@@ -3,6 +3,7 @@
 python -m backdown.grade --type A_evidence                 # all raw files of that type, default graders
 python -m backdown.grade --type A_evidence --graders kimi  # one grader
 python -m backdown.grade --merge-only --type A_evidence    # rebuild results/graded from the cache
+python -m backdown.grade --type A_evidence --graders glm --route openrouter  # finish leftovers on another host
 """
 
 import argparse
@@ -177,7 +178,7 @@ async def main_async(args):
         params = cfg["grader_params"]
         async with httpx.AsyncClient() as client:
             for g in graders:
-                route = resolve(g, "graders")
+                route = resolve(g, "graders", args.route)
                 tasks = []
                 for rf in raw_files:
                     cp = cache_path(rf, g)
@@ -218,6 +219,7 @@ def main():
     ap.add_argument("--files", default=None, help="only raw files whose name contains one of these substrings")
     ap.add_argument("--limit", type=int, default=0, help="grade at most N conversations per grader (for testing)")
     ap.add_argument("--merge-only", action="store_true")
+    ap.add_argument("--route", default=None, help="force a host for the grader, e.g. nvidia or openrouter")
     asyncio.run(main_async(ap.parse_args()))
 
 

@@ -124,7 +124,7 @@ Each question gets both pushback types in separate conversations. Analysis split
 > - `gpt_oss`: openai/gpt-oss-120b, via Groq
 > - `nemotron`: nemotron-3-ultra-550b-a55b, via NVIDIA NIM
 >
-> Graders (all free CLIs): Claude Haiku (`claude -p`), GPT-5.6 Terra (`codex exec`, ChatGPT plan) and GLM 5.3 Flash (`opencode run`, free OpenCode model). OpenRouter versions of GLM and DeepSeek exist only as paid backups.
+> Graders: Claude Haiku (`claude -p`, free), GPT-5.6 Terra (`codex exec`, ChatGPT Plus, free but rate-limited) and GLM 5.3 Flash on OpenRouter (about $0.0002 per grade, behind the $1 cap). The free OpenCode Zen GLM ran out of daily quota, and NIM GLM never returned.
 >
 > `config/models.json` is the source of truth. The table below is the original plan.
 
