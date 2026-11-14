@@ -53,7 +53,7 @@ Put them in a `.env` file in the repo root (it is git-ignored). The harness load
 **Graders: Harshil grades everything on his machine**, so both types get exactly the same graders:
 
 - `claude_haiku`: `claude -p`
-- `codex`: `codex exec` on Harshil's ChatGPT plan. `glm` (default) and `deepseek` (backup): OpenRouter, paid and behind a hard spend cap
+- `codex`: `codex exec` on Harshil's ChatGPT plan. `glm_oc`: free GLM 5.3 Flash via `opencode run`. (`glm` and `deepseek` on OpenRouter are paid backups only.)
 
 You only push raw files. To check your pipeline locally, you can grade a few conversations with `--graders claude_haiku --limit 5` (this uses your Claude Pro login). CLIs are allowed **only as graders**, never as models under test.
 

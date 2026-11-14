@@ -11,9 +11,9 @@
                    "spend_stop_env": "OPENROUTER_STOP_AT_USD"},
     "claude_cli": {"kind": "cli", "key_env": null, "concurrency": 3, "prompt_via": "stdin",
                    "cmd": ["claude", "-p", "--model", "{model}", "--system-prompt", "{system}", "--tools", "", "--output-format", "text", "--no-session-persistence", "--strict-mcp-config", "--setting-sources", ""]},
-    "opencode_cli": {"kind": "cli", "key_env": null, "concurrency": 2, "prompt_via": "arg",
+    "opencode_cli": {"kind": "cli", "key_env": null, "concurrency": 4, "prompt_via": "arg",
                    "cmd": ["opencode", "run", "--agent", "plan", "--archived", "-m", "{model}", "-f", "{prompt_file}", "{system} Your full task is in the attached file. Follow it exactly and reply with only the JSON object it asks for."]},
-    "codex_cli":  {"kind": "cli", "key_env": null, "concurrency": 2, "prompt_via": "stdin",
+    "codex_cli":  {"kind": "cli", "key_env": null, "concurrency": 3, "prompt_via": "stdin",
                    "cmd": ["codex", "exec", "--skip-git-repo-check", "--sandbox", "read-only", "-c", "model_reasoning_effort=low", "-m", "{model}", "-"]}
   },
   "subjects": {
@@ -30,8 +30,8 @@
     "deepseek_oc":  [{"provider": "opencode_cli", "model": "opencode/deepseek-v4.1-flash-free"}],
     "codex":        [{"provider": "codex_cli", "model": "gpt-5.6-terra"}]
   },
-  "default_graders": ["claude_haiku", "codex", "glm"],
-  "_grader_note": "glm and deepseek are paid OpenRouter routes (cents). Without an OpenRouter key, use glm_oc and deepseek_oc (free OpenCode models) instead.",
+  "default_graders": ["claude_haiku", "codex", "glm_oc"],
+  "_grader_note": "All default graders are free CLIs (Claude plan, ChatGPT plan, OpenCode free models). glm and deepseek on OpenRouter are paid backups only; OpenRouter money goes to subject models.",
   "subject_params": {"temperature": 0.7, "max_tokens": 3000},
   "grader_params": {"temperature": 0, "max_tokens": 2500}
 }

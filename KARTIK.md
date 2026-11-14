@@ -29,7 +29,7 @@ There is no free GPT-4.1 or Llama 3.3 70B route, so gpt-oss and Nemotron replace
 **Graders:**
 
 - Claude Haiku via `claude -p`
-- GPT-5.6 Terra via `codex exec` (Harshil's ChatGPT plan), and GLM 5.3 Flash via OpenRouter (cents, behind a hard spend cap). DeepSeek V4.1 Flash is a backup.
+- GPT-5.6 Terra via `codex exec` (Harshil's ChatGPT plan) and GLM 5.3 Flash via `opencode run` (free OpenCode model). All three graders are free.
 
 All three are from model families that are not under test. CLIs are graders only, never models under test. Harshil runs all grading on his machine.
 
