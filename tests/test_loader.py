@@ -96,7 +96,11 @@ class LoaderTests(unittest.TestCase):
                 main(["--in", str(self.path), "--out", str(output)])
             summaries.append(stream.getvalue())
         self.assertTrue(output.is_dir())
-        self.assertEqual(list(output.iterdir()), [])
+        self.assertEqual(list(output.iterdir()), [output / "metrics_table.csv"])
+        self.assertEqual(
+            (output / "metrics_table.csv").read_text(encoding="utf-8").splitlines()[0],
+            "type,model,stakes,pushback,metric,value,ci_low,ci_high,n,n_items",
+        )
         self.assertEqual(summaries[0], summaries[1])
         for line in ("total records: 1", "type A_evidence: 1",
                      "type B_fact: no data", "grader codex: 1",

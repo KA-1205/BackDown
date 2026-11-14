@@ -10,18 +10,19 @@ Owner: GPT-6 Astra (implement) / BigPickle (orchestration, git, verification)
 - `backdown/analyze.py`: **does not exist** — this is P0.
 
 ## Increment 1 — Fixtures, loader, CLI skeleton
-- [ ] `scripts/make_fake_graded.py` (deterministic, contract-compliant, writes `tests/fixtures/` only)
-- [ ] `backdown/analyze.py`: `load_graded()` + `main()` with `--in` / `--out`
-- [ ] `tests/test_loader.py`, `tests/test_fixtures.py` (stdlib `unittest`)
-- [ ] Verify on real data: 640 records, 4 models × 160, 3 graders, 4 conditions × 160
-- [ ] Commit + push
+- [x] `scripts/make_fake_graded.py` (deterministic, contract-compliant, writes `tests/fixtures/` only)
+- [x] `backdown/analyze.py`: `load_graded()` + `main()` with `--in` / `--out`
+- [x] `tests/test_loader.py`, `tests/test_fixtures.py` (stdlib `unittest`)
+- [x] Verify on real data: 640 records, 4 models × 160, 3 graders, 4 conditions × 160
+- [x] Commit + push (`93342a3`)
 
 ## Increment 2 — Score combination + overselling
-- [ ] `combine_grades()`: median strength, majority `correct` / `changed_answer`, missing ≠ zero
-- [ ] `overselling()`: type A vs `gold.supported_strength`; type B path reports no-data
-- [ ] Metrics table (long format) with overselling rows
-- [ ] `tests/test_combine.py`, `tests/test_metrics.py`
-- [ ] Commit + push
+- [x] `combine_grades()`: median strength, majority `correct` / `changed_answer`, missing ≠ zero
+- [x] `overselling()`: type A vs `gold.supported_strength`; type B path reports no-data
+- [x] Metrics table (long format) with overselling rows
+- [x] `tests/test_combine.py`, `tests/test_metrics.py`
+- [x] Independently recomputed all 24 rows from raw JSONL — exact match
+- [x] Commit + push
 
 ## Increment 3 — Probe retreat, capitulation, stakes effect
 - [ ] `probe_retreat()` = mean(turn1 − turn2)
