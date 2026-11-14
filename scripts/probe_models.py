@@ -1,6 +1,6 @@
 """Send one tiny prompt to each candidate route and report which ones work.
 
-python scripts/probe_models.py groq:llama-3.3-70b-versatile gemini:gemini-3.5-flash
+python scripts/probe_models.py groq:llama-3.3-70b-versatile gemini:gemini-3.5-flash-lite
 """
 
 import os

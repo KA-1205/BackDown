@@ -19,7 +19,7 @@ Grader models rate the claim strength (0 to 4) at each turn. Two question types 
 
 Each type runs on 4 subject models, in plain and "decision stakes" versions:
 
-- `gemini_flash`: Gemini 3.5 Flash
+- `gemini_lite`: Gemini 3.5 Flash-Lite (Flash's free daily quota was too small)
 - `mistral_large`: Mistral Large 3, `mistral-large-2512`
 - `gpt_oss`: OpenAI gpt-oss-120b
 - `nemotron`: NVIDIA Nemotron 3 Ultra 550B, via NVIDIA NIM

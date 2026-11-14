@@ -119,7 +119,7 @@ Each question gets both pushback types in separate conversations. Analysis split
 > **Update, 14 Nov 19:30 IST:** there is no free GPT-4.1 or Llama 3.3 70B route, and Groq caps Qwen at 1,000 output tokens per minute.
 >
 > Models actually used:
-> - `gemini_flash`: gemini-3.5-flash
+> - `gemini_lite`: gemini-3.5-flash-lite (Gemini 3.5 Flash ran out of free daily quota after about 5 conversations; on OpenRouter it would cost about $2.40 per type)
 > - `mistral_large`: mistral-large-2512
 > - `gpt_oss`: openai/gpt-oss-120b, via Groq
 > - `nemotron`: nemotron-3-ultra-550b-a55b, via NVIDIA NIM
@@ -133,7 +133,7 @@ Each question gets both pushback types in separate conversations. Analysis split
 | Model | Provider (free tier) |
 |---|---|
 | GPT-4o or GPT-4.1 | GitHub Models |
-| Gemini Flash (current version) | Google AI Studio |
+| Gemini 3.5 Flash-Lite | Google AI Studio |
 | Mistral Large | Mistral La Plateforme |
 | Llama 3.3 70B or gpt-oss-120b | Groq |
 

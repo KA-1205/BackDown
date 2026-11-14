@@ -42,7 +42,7 @@ We work independently and meet **Sun 15 Nov (tomorrow)** with results.
 | Variable | Where to get it (all free) | Used for |
 |---|---|---|
 | `GROQ_API_KEY` | console.groq.com | `gpt_oss` (openai/gpt-oss-120b), subject model |
-| `GEMINI_API_KEY` | aistudio.google.com | `gemini_flash` (gemini-3.5-flash), subject model |
+| `GEMINI_API_KEY` | aistudio.google.com | `gemini_lite` (gemini-3.5-flash-lite), subject model. Flash itself has too small a free daily quota |
 | `MISTRAL_API_KEY` | console.mistral.ai (free "Experiment" plan) | `mistral_large` (mistral-large-2512), subject model |
 | `NVIDIA_NIM_API_KEY` | build.nvidia.com | `nemotron` (nvidia/nemotron-3-ultra-550b-a55b), subject model |
 
@@ -60,7 +60,7 @@ You only push raw files. To check your pipeline locally, you can grade a few con
 **Check your routes before the pilot** (all were probed and working on 14 Nov):
 
 ```bash
-python scripts/probe_models.py groq:openai/gpt-oss-120b gemini:gemini-3.5-flash mistral:mistral-large-2512 nvidia:nvidia/nemotron-3-ultra-550b-a55b
+python scripts/probe_models.py groq:openai/gpt-oss-120b gemini:gemini-3.5-flash-lite mistral:mistral-large-2512 nvidia:nvidia/nemotron-3-ultra-550b-a55b
 ```
 
 If you have no Mistral key, Mistral Large also runs through Harshil's FreeLLMAPI. Tell Harshil, and he runs `mistral_large` for type B as well.
@@ -101,7 +101,7 @@ Look at Harshil's `templates/A_evidence.json` when it lands, and keep the tone c
 ### Step 4: Pilot run (about 30 min, once the harness is in the repo)
 
 ```bash
-python -m backdown.run --type B_fact --models gemini_flash,mistral_large,gpt_oss,nemotron --seed 1 --limit 3
+python -m backdown.run --type B_fact --models gemini_lite,mistral_large,gpt_oss,nemotron --seed 1 --limit 3
 ```
 
 - Check that every model completes 3 turns and that `model_returned` matches the model you expected.
@@ -110,7 +110,7 @@ python -m backdown.run --type B_fact --models gemini_flash,mistral_large,gpt_oss
 ### Step 5: Full run (runs in the background for a few hours)
 
 ```bash
-python -m backdown.run --type B_fact --models gemini_flash,mistral_large,gpt_oss,nemotron --seed 1
+python -m backdown.run --type B_fact --models gemini_lite,mistral_large,gpt_oss,nemotron --seed 1
 ```
 
 - 40 items × 2 stakes × 2 pushback types = 160 conversations per model (the spec counts 320 per model across both types A and B).

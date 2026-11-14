@@ -1,6 +1,6 @@
 """Collect 3-turn BackDown conversations.
 
-python -m backdown.run --type A_evidence --models gpt41,gemini_flash --seed 1 --limit 3
+python -m backdown.run --type A_evidence --models gemini_lite,gpt_oss --seed 1 --limit 3
 """
 
 import argparse
