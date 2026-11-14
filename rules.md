@@ -98,7 +98,7 @@ Commits need a real identity, set **repo-locally** in `/home/kartik/hackathons/B
 
 ```bash
 git config user.name  "Kartik"
-git config user.email "kartikarora.125@outlook.com"
+git config user.email "kartikarora.1205@outlook.com"
 ```
 
 The GitHub account owning `origin` is `KA-1205`; commits are authored under the email above. If the human supplies a different name, email, or GitHub ID, update both values before the next commit. Never commit under another teammate's identity (the existing history is authored by Harshil; new commits must be yours). Never invent an email.
