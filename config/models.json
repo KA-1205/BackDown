@@ -3,6 +3,7 @@
   "providers": {
     "freellmapi": {"kind": "openai", "base_url": "http://localhost:3001/v1", "key_env": "FREELLMAPI_API_KEY", "concurrency": 3},
     "gemini":     {"kind": "openai", "base_url": "https://generativelanguage.googleapis.com/v1beta/openai", "key_env": "GEMINI_API_KEY", "concurrency": 3},
+    "gemini2":    {"kind": "openai", "base_url": "https://generativelanguage.googleapis.com/v1beta/openai", "key_env": "GEMINI_API_KEY_2", "concurrency": 3},
     "groq":       {"kind": "openai", "base_url": "https://api.groq.com/openai/v1", "key_env": "GROQ_API_KEY", "concurrency": 2},
     "groq2":      {"kind": "openai", "base_url": "https://api.groq.com/openai/v1", "key_env": "OPENCODE_GROQ_API_KEY", "concurrency": 2},
     "mistral":    {"kind": "openai", "base_url": "https://api.mistral.ai/v1", "key_env": "MISTRAL_API_KEY", "concurrency": 1},
@@ -17,7 +18,7 @@
                    "cmd": ["codex", "exec", "--skip-git-repo-check", "--sandbox", "read-only", "-c", "model_reasoning_effort=low", "-m", "{model}", "-"]}
   },
   "subjects": {
-    "gemini_lite":   [{"provider": "gemini", "model": "gemini-3.5-flash-lite"}, {"provider": "freellmapi", "model": "gemini-3.5-flash-lite"}],
+    "gemini_lite":   [{"provider": "gemini", "model": "gemini-3.5-flash-lite"}, {"provider": "freellmapi", "model": "gemini-3.5-flash-lite"}, {"provider": "gemini2", "model": "gemini-3.5-flash-lite"}],
     "mistral_large": [{"provider": "mistral", "model": "mistral-large-2512"}, {"provider": "freellmapi", "model": "mistral-large-3"}],
     "gpt_oss":       [{"provider": "openrouter", "model": "openai/gpt-oss-120b", "extra": {"provider": {"sort": "price"}, "reasoning": {"effort": "medium"}}}, {"provider": "groq", "model": "openai/gpt-oss-120b"}, {"provider": "groq2", "model": "openai/gpt-oss-120b"}],
     "nemotron":      [{"provider": "nvidia", "model": "nvidia/nemotron-3-ultra-550b-a55b"}]
