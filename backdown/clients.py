@@ -4,7 +4,9 @@ CLI tools (claude -p, opencode run, codex exec) are allowed only as graders."""
 import asyncio
 import json
 import random
+import re
 import shutil
+import tempfile
 import time
 from dataclasses import dataclass, field
 
@@ -83,6 +85,16 @@ def _flatten(messages: list[dict]) -> tuple[str, str]:
     return system, "\n\n".join(f"[{m['role'].upper()}]\n{m['content']}" for m in rest)
 
 
+_SANDBOX = tempfile.mkdtemp(prefix="backdown_cli_")
+_ANSI = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
+
+
+def _clean_cli(raw: str) -> str:
+    lines = [_ANSI.sub("", ln) for ln in raw.splitlines()]
+    lines = [ln for ln in lines if not ln.strip().startswith("> ")]  # opencode "> build · model" header
+    return "\n".join(lines).strip()
+
+
 async def _chat_cli(route: Route, messages, max_attempts) -> Reply:
     p = load_config()["providers"][route.provider]
     system, prompt = _flatten(messages)
@@ -96,16 +108,17 @@ async def _chat_cli(route: Route, messages, max_attempts) -> Reply:
     last_err = None
     for attempt in range(1, min(max_attempts, 4) + 1):
         t0 = time.perf_counter()
+        # Run in an empty temp folder so an agent CLI cannot see or touch the repo.
         proc = await asyncio.create_subprocess_exec(
             *cmd, stdin=asyncio.subprocess.PIPE if stdin_data else asyncio.subprocess.DEVNULL,
-            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, cwd=_SANDBOX)
         try:
             out, err = await asyncio.wait_for(proc.communicate(stdin_data), timeout=300)
         except asyncio.TimeoutError:
             proc.kill()
             last_err = "timeout"
             continue
-        text = out.decode("utf-8", errors="replace").strip()
+        text = _clean_cli(out.decode("utf-8", errors="replace"))
         if proc.returncode == 0 and text:
             return Reply(text=text, model_returned=f"{route.provider}:{route.model}",
                          latency_s=round(time.perf_counter() - t0, 2), attempts=attempt)

@@ -34,18 +34,32 @@ We work independently and meet **Sun 15 Nov (tomorrow)** with results.
 
 ### Step 1: Get the repo and keys (about 20 min)
 
-- Clone the repo when Harshil sends the GitHub link. Until then, build Steps 2 and 3 in a local folder with the same paths and copy them in later.
+- Clone the repo: `git clone https://github.com/harshil-sri/BackDown` (ask Harshil for collaborator access). If you got this as a zip, unzip it, then work in the clone so you can push.
+- The shared harness (`backdown/`), the type-A items and templates (`templates/A_evidence.json`) are already in the repo. Use them as working examples.
 - Python 3.12 or newer. Install the requirements with `pip install -r requirements.txt` (or `uv pip install -r requirements.txt`).
 - Create free API keys and set them as environment variables. The harness reads only these names:
 
 | Variable | Where to get it (all free) | Used for |
 |---|---|---|
-| `GROQ_API_KEY` | console.groq.com | Llama 3.3 70B (subject model) |
-| `GEMINI_API_KEY` | aistudio.google.com | Gemini Flash (subject model) |
-| `GITHUB_TOKEN` | github.com → Settings → Developer settings → fine-grained token with "Models: read" | GPT-4.1 via GitHub Models (subject model) |
-| `MISTRAL_API_KEY` | console.mistral.ai (free "Experiment" plan) | Mistral Large (subject model) |
-| `NVIDIA_NIM_API_KEY` | build.nvidia.com | Graders (Qwen3, DeepSeek, Kimi) |
-| `OPENROUTER_API_KEY` | openrouter.ai | Backup grader route |
+| `GROQ_API_KEY` | console.groq.com | `gpt_oss` (openai/gpt-oss-120b) and `qwen` (qwen/qwen3.8-27b), subject models |
+| `GEMINI_API_KEY` | aistudio.google.com | `gemini_flash` (gemini-3.5-flash), subject model |
+| `MISTRAL_API_KEY` | console.mistral.ai (free "Experiment" plan) | `mistral_large` (mistral-large-2512), subject model |
+| `OPENROUTER_API_KEY` | openrouter.ai | Backup grader (`nemotron`) |
+
+Put them in a `.env` file in the repo root (it is git-ignored). The harness loads it automatically.
+
+**Graders** run through CLI tools that are already logged in on your machine, so they use no API keys:
+
+- `claude_haiku` uses Claude Code (`claude -p`) with your Claude Pro login.
+- `glm` and `deepseek` use OpenCode's free models (`opencode run`), if you have OpenCode installed.
+
+CLIs are allowed **only as graders**, never as models under test. Check `config/models.json` for the exact routes. All routes were probed and working on 14 Nov.
+
+**Check your routes before the pilot:**
+
+```bash
+python scripts/probe_models.py groq:openai/gpt-oss-120b groq:qwen/qwen3.8-27b gemini:gemini-3.5-flash mistral:mistral-large-2512
+```
 
 - Never commit keys. `.env` is in `.gitignore`.
 
@@ -83,7 +97,7 @@ Look at Harshil's `templates/A_evidence.json` when it lands, and keep the tone c
 ### Step 4: Pilot run (about 30 min, once the harness is in the repo)
 
 ```bash
-python -m backdown.run --type B_fact --models gpt41,gemini_flash,mistral_large,llama70b --seed 1 --limit 3
+python -m backdown.run --type B_fact --models gemini_flash,mistral_large,gpt_oss,qwen --seed 1 --limit 3
 ```
 
 - Check that every model completes 3 turns and that `model_returned` matches the model you expected.
@@ -92,7 +106,7 @@ python -m backdown.run --type B_fact --models gpt41,gemini_flash,mistral_large,l
 ### Step 5: Full run (runs in the background for a few hours)
 
 ```bash
-python -m backdown.run --type B_fact --models gpt41,gemini_flash,mistral_large,llama70b --seed 1
+python -m backdown.run --type B_fact --models gemini_flash,mistral_large,gpt_oss,qwen --seed 1
 ```
 
 - 40 items × 2 stakes × 2 pushback types = 160 conversations per model (the spec counts 320 per model across both types A and B).
@@ -107,7 +121,7 @@ python -m backdown.run --type B_fact --models gpt41,gemini_flash,mistral_large,l
 python -m backdown.grade --type B_fact
 ```
 
-If your NVIDIA or OpenRouter key does not work for the graders, push the raw files and Harshil grades them.
+This uses the default graders (`claude_haiku`, `glm`, `deepseek`). If a grader CLI is missing on your machine, run only the ones you have (for example `--graders claude_haiku`) and push the raw files. Harshil grades the rest.
 
 ### Step 7: Rotation check (if time allows)
 
