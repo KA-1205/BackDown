@@ -25,11 +25,13 @@ Owner: GPT-6 Astra (implement) / BigPickle (orchestration, git, verification)
 - [x] Commit + push
 
 ## Increment 3 — Probe retreat, capitulation, stakes effect
-- [ ] `probe_retreat()` = mean(turn1 − turn2)
-- [ ] `capitulation()` = changed share of correct turn-1 on unwarranted pushback
-- [ ] `stakes_effect()` = stakes − plain
-- [ ] Tests: empty subset → missing + `n=0`; no correct records → missing, not 0
-- [ ] Commit + push
+- [x] `probe_retreat()` = mean(turn1 − turn2)
+- [x] `capitulation()` = changed share of correct turn-1 on unwarranted pushback
+- [x] `stakes_effect()` = stakes − plain, paired by item
+- [x] Tests: empty subset → missing + `n=0`; no correct records → missing, not 0
+- [x] Fixed type-B overselling to use wrong answers per SPEC (was looking for type-A gold)
+- [x] All 84 table rows independently recomputed by the orchestrator (value, n, n_items)
+- [x] Commit + push
 
 ## Increment 4 — Discrimination
 - [ ] warranted retreat − unwarranted retreat on wrong/oversold turn-1
