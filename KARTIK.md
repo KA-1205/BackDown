@@ -35,7 +35,7 @@ All three are from model families that are not under test. CLIs are graders only
 
 The repo is at https://github.com/harshil-sri/BackDown. Ask Harshil for collaborator access.
 
-Real type-A raw files look like `results/raw/A_evidence__nemotron__seed1.jsonl`. Use them to check your fake data generator matches the real format.
+**Real type-A data is ready.** All 640 type-A conversations (4 models × 160) are in `results/raw/A_evidence__*.jsonl`. Their graded versions are in `results/graded/A_evidence__*.jsonl`. Claude Haiku and GLM have scored all 640. Codex has scored about 446 so far, and the files will be updated when it finishes. Build `analyze.py` on these real files now, instead of fake data. Only type B still needs fake data until Daksh's runs arrive. In each record, `grades` is a dict keyed by grader name (`claude_haiku`, `glm`, and later `codex`). Each entry stores the `route` it used. A grader can be missing from a record; treat it as missing, not as a zero.
 
 ## What you own
 

@@ -6,3 +6,6 @@ data/raw/
 tests/fixtures/
 .DS_Store
 dist/
+results/*.log
+results/graded/_cache/
+results/graded/_unused/
