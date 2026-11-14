@@ -4,6 +4,8 @@ import argparse
 import csv
 import json
 import math
+import random
+import zlib
 from pathlib import Path
 from statistics import mean, median
 
@@ -163,17 +165,20 @@ def discrimination(records, items):
 def discrimination_paired(records, items):
     """Mean matched-item contrast; average eligible repeats within each condition."""
     sides, _ = _discrimination_sides(records, items)
-    means = {}
-    for condition, values in sides.items():
+    return _summarize(_paired_differences(sides["unwarranted"], sides["warranted"]))
+
+
+def _paired_differences(before, after):
+    """One after-minus-before difference per matched item, averaging repeats."""
+    means = []
+    for values in (before, after):
         by_item = {}
         for item, value in values:
             by_item.setdefault(item, []).append(value)
-        means[condition] = {item: mean(values) for item, values in by_item.items()}
-    warranted, unwarranted = means["warranted"], means["unwarranted"]
-    return _summarize([
-        (item, warranted[item] - unwarranted[item])
-        for item in sorted(warranted.keys() & unwarranted.keys())
-    ])
+        means.append({item: mean(values) for item, values in by_item.items()})
+    before_means, after_means = means
+    return [(item, after_means[item] - before_means[item])
+            for item in sorted(before_means.keys() & after_means.keys())]
 
 
 def stakes_effect(plain, stakes, items, metric):
@@ -182,17 +187,110 @@ def stakes_effect(plain, stakes, items, metric):
     In pooled 'both' groups, pushback records are repeats of the same item.
     Each matched item has equal weight regardless of its record count.
     """
-    sides = []
-    for records in (plain, stakes):
-        by_item = {}
-        for item, value in _usable_values(records, items, metric):
-            by_item.setdefault(item, []).append(value)
-        sides.append({item: mean(values) for item, values in by_item.items()})
-    plain_values, stakes_values = sides
-    return _summarize([
-        (item, stakes_values[item] - plain_values[item])
-        for item in sorted(plain_values.keys() & stakes_values.keys())
-    ])
+    return _summarize(_paired_differences(
+        _usable_values(plain, items, metric), _usable_values(stakes, items, metric)))
+
+
+def percentile(values, q):
+    """Linearly interpolate the q quantile of an ascending, nonempty sample."""
+    position = (len(values) - 1) * q
+    lower, upper = math.floor(position), math.ceil(position)
+    return float(values[lower] + (values[upper] - values[lower]) * (position - lower))
+
+
+def _cluster_totals(values):
+    by_item = {}
+    for item, value in values:
+        by_item.setdefault(item, []).append(value)
+    return {item: (math.fsum(values), len(values)) for item, values in by_item.items()}
+
+
+def _resample_statistic(sample, statistic):
+    """Sample contains one sufficient-statistics tuple per drawn item."""
+    total = math.fsum(item[0] for item in sample)
+    count = sum(item[1] for item in sample)
+    if not count:
+        return None
+    value = total / count
+    if statistic == "discrimination":
+        other_count = sum(item[3] for item in sample)
+        if not other_count:
+            return None
+        value -= math.fsum(item[2] for item in sample) / other_count
+    return value
+
+
+def bootstrap_ci(clusters, statistic, point, row_key):
+    """95% item-cluster percentile CI from exactly 1,000 deterministic draws.
+
+    Mean clusters hold (sum, count); discrimination clusters hold both sides'
+    (sum, count) pairs. Paired contrasts are means with one difference per item.
+    """
+    population = [clusters[item] for item in sorted(clusters)]
+    original = _resample_statistic(population, statistic)
+    if point is None or point == "NA":
+        assert original is None, f"Point mismatch: {row_key}"
+        return "NA", "NA"
+    assert original is not None and math.isclose(
+        original, point, rel_tol=1e-12, abs_tol=1e-12), f"Point mismatch: {row_key}"
+    seed = (12345 + zlib.crc32(row_key.encode("utf-8"))) & 0xFFFFFFFF
+    rng = random.Random(seed)
+    values = []
+    for _ in range(1000):
+        sample = [rng.choice(population) for _ in population]
+        value = _resample_statistic(sample, statistic)
+        if value is not None:
+            values.append(value)
+    if len(values) < 900:
+        print(f"warning: {row_key}: only {len(values)}/1000 valid bootstrap resamples")
+        return "NA", "NA"
+    if len(population) == 1:
+        return float(point), float(point)
+    values.sort()
+    low, high = percentile(values, 0.025), percentile(values, 0.975)
+    assert math.isfinite(low) and math.isfinite(high) and low <= high
+    return low, high
+
+
+def add_bootstrap_cis(rows, records, items):
+    """Enrich point-estimate rows in place without changing values or counts."""
+    for row in rows:
+        subset = [record for record in records
+                  if record["type"] == row["type"] and record["model_key"] == row["model"]
+                  and (row["pushback"] in ("both", "warranted_minus_unwarranted")
+                       or record["condition"]["pushback"] == row["pushback"])]
+        name = row["metric"]
+        statistic = "mean"
+        if row["stakes"] == "stakes_minus_plain":
+            values = _paired_differences(
+                _usable_values([r for r in subset if not r["condition"]["stakes"]],
+                               items, name),
+                _usable_values([r for r in subset if r["condition"]["stakes"]],
+                               items, name))
+            clusters = _cluster_totals(values)
+        else:
+            subset = [r for r in subset
+                      if r["condition"]["stakes"] == (row["stakes"] == "stakes")]
+            if name in ("discrimination", "discrimination_paired"):
+                sides, _ = _discrimination_sides(subset, items)
+                if name == "discrimination_paired":
+                    clusters = _cluster_totals(_paired_differences(
+                        sides["unwarranted"], sides["warranted"]))
+                else:
+                    statistic = "discrimination"
+                    warranted = _cluster_totals(sides["warranted"])
+                    unwarranted = _cluster_totals(sides["unwarranted"])
+                    clusters = {
+                        item: warranted.get(item, (0, 0)) + unwarranted.get(item, (0, 0))
+                        for item in warranted.keys() | unwarranted.keys()
+                    }
+            else:
+                clusters = _cluster_totals(_usable_values(subset, items, name))
+        assert len(clusters) == row["n_items"]
+        row_key = "|".join(row[key] for key in ("type", "model", "stakes", "pushback", "metric"))
+        row["ci_low"], row["ci_high"] = bootstrap_ci(
+            clusters, statistic, row["value"], row_key)
+    return rows
 
 
 def _metric_row(kind, model, stakes, pushback, name, result):
@@ -330,6 +428,7 @@ def main(argv=None):
     for kind in sorted(result["by_type"]):
         items.update(load_items(args.items, kind))
     rows = metrics_rows(result["records"], items)
+    add_bootstrap_cis(rows, result["records"], items)
     write_metrics_table(rows, args.out)
     print(f"files read: {len(result['files_read'])}")
     print(f"total records: {len(result['records'])}")
