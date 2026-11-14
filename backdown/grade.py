@@ -14,7 +14,7 @@ from pathlib import Path
 
 import httpx
 
-from .clients import chat
+from .clients import SpendCapReached, chat
 from .config import ROOT, load_config, resolve
 from .io import append_jsonl, latest_by_id, read_items, read_jsonl
 
@@ -129,6 +129,8 @@ async def grade_one(route, rec, item, params, client, path, retries=2):
                    "grade": g, "error": None}
             append_jsonl(path, out)
             return out
+        except SpendCapReached:
+            raise
         except Exception as e:
             last = str(e)[:500]
     out = {"conv_id": rec["conv_id"], "grader": route.model_key, "grade": None, "error": last}
@@ -136,7 +138,12 @@ async def grade_one(route, rec, item, params, client, path, retries=2):
     return out
 
 
-def merge(raw_path: Path, graders: list[str]) -> Path:
+def merge(raw_path: Path, graders: list[str] | None = None) -> Path:
+    """Merge every grader that has a cache for this raw file (graders argument kept for compatibility)."""
+    prefix = f"{raw_path.stem}__"
+    cache_dir = ROOT / "results" / "graded" / "_cache"
+    graders = sorted(p.stem[len(prefix):] for p in cache_dir.glob(f"{prefix}*.jsonl")
+                     if "__" not in p.stem[len(prefix):])
     raw = latest_by_id(read_jsonl(raw_path), "conv_id")
     out = ROOT / "results" / "graded" / raw_path.name
     rows = []
@@ -184,7 +191,13 @@ async def main_async(args):
                 print(f"grader {g} ({route.provider}/{route.model}): {len(tasks)} to grade", flush=True)
                 ok = err = 0
                 for fut in asyncio.as_completed(tasks):
-                    r = await fut
+                    try:
+                        r = await fut
+                    except SpendCapReached as e:
+                        print(f"STOPPED: {e}", file=sys.stderr)
+                        for rf in raw_files:
+                            merge(rf, graders)
+                        raise SystemExit(2)
                     if r["error"]:
                         err += 1
                         print(f"  ERR {r['conv_id']}: {r['error'][:160]}", file=sys.stderr)
