@@ -73,8 +73,9 @@ up to three graders; 132 record-turns have a spread of at least 2 and are listed
 in `grader_disagreements.csv`. Turn-1 findings therefore carry more
 grader-induced uncertainty than turns 2 and 3.
 
-## 7. Human validation is still empty
+## 7. Human validation is incomplete
 
-No human strength labels have been filled in, so the human-vs-grader section
-prints `No human labels yet.` Nothing in `grader_agreement.md` yet says anything
-about agreement between the graders and a human expert.
+Kartik has filled 36 strength labels across 12 conversations; the other two
+label files remain blank (66 rows). `grader_agreement.md` compares this one
+labeler's scores with the model graders. This is not an inter-human agreement
+estimate or a completed multi-labeler validation.

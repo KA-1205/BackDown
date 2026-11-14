@@ -106,10 +106,13 @@ class ReportDraftTest(unittest.TestCase):
         for caption in ("**Figure 1.", "**Table 1.", "**Table 2."):
             self.assertIn(caption, text)
 
-    def test_human_comparison_is_pending(self):
+    def test_human_comparison_reports_available_labels_and_pending_validation(self):
         human = read_report().split("### 4.4 Human vs grader", 1)[1].split("\n## ", 1)[0]
         self.assertIn("PENDING", human)
-        self.assertNotIn("| Turn |", human)
+        self.assertIn("**Table 3.", human)
+        self.assertIn("| All turns | 36 | 0.722222 | 0.361111 | 0.916667 |", human)
+        self.assertIn("66 strength rows remain blank", human)
+        self.assertIn("No inter-human agreement estimate is available", human)
 
     def test_editable_document_embeds_figure_and_tables(self):
         self.assertTrue(DOCX.is_file())
@@ -125,7 +128,7 @@ class ReportDraftTest(unittest.TestCase):
             text = "".join(t.text or "" for t in document.findall(".//w:t", ns))
             self.assertEqual(text.count(PLACEHOLDER), 1)
             self.assertIn("github.com/KA-1205/BackDown", text)
-            self.assertEqual(len(document.findall(".//w:tbl", ns)), 2)
+            self.assertEqual(len(document.findall(".//w:tbl", ns)), 3)
 
 
 if __name__ == "__main__":

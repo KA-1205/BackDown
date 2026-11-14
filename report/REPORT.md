@@ -7,7 +7,7 @@ Research conducted at the AI x Epistemics Research Sprint, November 2026, with A
 
 ## Abstract
 
-An assistant can sound convincing initially yet weaken its answer when challenged. Evaluating this behavior requires separating responsiveness to evidence from responsiveness to disagreement. BackDown compares initial, neutrally probed, and defended claim strength in conversations with evidence-bearing or unsupported pushback, with and without decision-stakes framing. We analyze 640 conversations from four API-served models on 40 PubMedQA items, using median strength scores from three model graders. Under the benchmark's label-to-strength mapping, mean initial overselling ranges from 1.45 to 1.84 scale points without stakes and from 1.28 to 1.56 with stakes. The warranted-minus-unwarranted retreat contrast is negative in every model-by-stakes cell, ranging from −1.10 to −0.08; item-matched estimates retain the negative sign. This does not establish that models ignore evidence: quoted conclusions can confirm an initial answer, and the eligibility rule mixes incorrect answers with answers classified as oversold. Turn-level ordinal grader agreement ranges from 0.522 to 0.764, while human validation remains pending. Stakes-associated differences are descriptive rather than isolated causal effects. BackDown provides an auditable protocol for examining conversational claim stability, but its current results also expose measurement ambiguities that must be resolved before interpreting model differences as epistemic quality.
+An assistant can sound convincing initially yet weaken its answer when challenged. Evaluating this behavior requires separating responsiveness to evidence from responsiveness to disagreement. BackDown compares initial, neutrally probed, and defended claim strength in conversations with evidence-bearing or unsupported pushback, with and without decision-stakes framing. We analyze 640 conversations from four API-served models on 40 PubMedQA items, using median strength scores from three model graders. Under the benchmark's label-to-strength mapping, mean initial overselling ranges from 1.45 to 1.84 scale points without stakes and from 1.28 to 1.56 with stakes. The warranted-minus-unwarranted retreat contrast is negative in every model-by-stakes cell, ranging from −1.10 to −0.08; item-matched estimates retain the negative sign. This does not establish that models ignore evidence: quoted conclusions can confirm an initial answer, and the eligibility rule mixes incorrect answers with answers classified as oversold. Turn-level ordinal grader agreement ranges from 0.522 to 0.764. Against author Kartik's 36 strength labels across 12 selected conversations, median grader scores have mean absolute error 0.722, exact agreement 0.361, and within-one agreement 0.917. This small, single-labeler comparison does not establish general validity; further human grading remains pending, with no inter-human agreement estimate. Stakes-associated differences are descriptive rather than isolated causal effects. BackDown provides an auditable protocol for examining conversational claim stability, but measurement ambiguities must be resolved before interpreting model differences as epistemic quality.
 
 ## 1. Introduction
 
@@ -103,7 +103,18 @@ There are 132 conversation-turns with grader spread of at least two points: 21 i
 
 ### 4.4 Human vs grader
 
-**PENDING — human labeling is in progress.** No partial human labels were read or used for this draft. Human–grader error, agreement, and human inter-rater findings remain unreported.
+Kartik has completed **36 human strength labels: 12 conversations × three turns**, all from one author-labeler. Table 3 compares these final labels with the median of available model-grader strength scores. Each filled human turn row contributes one comparison; the 36 rows are repeated turns within 12 conversations, not 36 independent conversations. The regenerated comparison reports zero invalid strengths and zero unmatched conversation/turn identifiers.
+
+**Table 3. Kartik's final human strength labels versus combined grader strength.** MAE is mean absolute error in strength-scale points; exact and within-one agreement are proportions. Combined strength is the median of available grader scores. Source: the `combined` rows in the human-vs-grader section of `figures/grader_agreement.md`, using `results/human/labels_A_evidence__kartik.csv`.
+
+| Turn | n | MAE | Exact agreement | Within one point |
+|---|---:|---:|---:|---:|
+| All turns | 36 | 0.722222 | 0.361111 | 0.916667 |
+| Initial | 12 | 0.583333 | 0.500000 | 0.916667 |
+| Neutral probe | 12 | 0.750000 | 0.250000 | 1.000000 |
+| Pushback | 12 | 0.833333 | 0.333333 | 0.833333 |
+
+**PENDING — additional human labeling and multi-human validation.** This is a small convenience/stratified selected sample, not an unbiased validation sample. Labeling assignments overlap across authors, but only Kartik's labels are filled: **66 strength rows remain blank** in the other two labeler files (33 each). No inter-human agreement estimate is available. These results describe agreement with one author's judgments; they do not constitute completed independent multi-human validation or establish general grader validity.
 
 ## 5. Discussion and Limitations
 
@@ -113,7 +124,7 @@ There is also a directional ambiguity in overselling: graders score the model's 
 
 The study is small, English-only, and biomedical. One seed does not demonstrate rotation robustness. Stakes and other template wording can change together; separate conversations introduce generation variability. Grader consensus is not ground truth, and the bootstrap does not incorporate systematic grader bias. The present analysis also supplies no completed explicit-confidence ablation or consumer-chat comparison.
 
-Priority follow-ups are completed blind human validation, the CONTRACT-correctness sensitivity, direction-aligned scoring, and evidence-relation stratification. Matched wording and repeated seeds would strengthen subsequent condition comparisons.
+Kartik's completed strength labels provide a limited human–grader comparison, but one author-labeler, a small selected sample, and overlapping assignments do not establish independent multi-human validation. The remaining 66 blank strength rows leave inter-human agreement unestimated. Priority follow-ups are further independent, blind human grading, the CONTRACT-correctness sensitivity, direction-aligned scoring, and evidence-relation stratification. Matched wording and repeated seeds would strengthen subsequent condition comparisons.
 
 ## 6. Conclusion
 
@@ -138,14 +149,14 @@ The conversations show positive mapped overselling and negative warranted-minus-
 
 ### Limitations and Dual-Use / Ethical Considerations
 
-**Measurement and scope.** Median aggregation cannot remove shared grader bias. Human validation remains pending. Label-to-strength mapping, claim orientation, and correctness definitions require sensitivity checks. English biomedical abstracts do not represent all factual or advisory interactions.
+**Measurement and scope.** Median aggregation cannot remove shared grader bias. Kartik's 36 completed strength labels cover 12 selected conversations; this single-author comparison is limited by sample size, selection, and repeated turns. Assignments overlap, but 66 strength rows remain blank in the other two label files, so further human grading is pending and no inter-human agreement is estimated. Label-to-strength mapping, claim orientation, and correctness definitions require sensitivity checks. English biomedical abstracts do not represent all factual or advisory interactions.
 
 **Operational limits.** Hosted aliases and routes can change. Requested/returned model identifiers, timestamps, and routes are recorded, but future calls may differ. Across the analyzed records, 28 of 1,920 subject turns ended with `finish_reason=length`: 19 for gpt-oss and nine for Nemotron. These turns remain included. Source: `turn_meta` in the graded JSONL files, also summarized in `figures/caveats.md`. Truncation may affect judged claim strength.
 
 **Dual use and privacy.** Pushback templates could be repurposed to pressure assistants toward unsupported positions. Their intended use is auditing susceptibility and evidence responsiveness, not optimizing manipulation. Study inputs are published abstracts and constructed decision scenarios; no participant personal data were collected for these API experiments. Medical examples do not establish clinical safety.
 
-**Audit trail.** The abstract's ranges summarize Table 1 and Table 2; all metric-row identifiers are specified in their captions or adjacent text. Grader disagreements are enumerated in `figures/grader_disagreements.csv`. Conclusions should remain provisional until the pending human and correctness-sensitivity analyses are complete.
+**Audit trail.** The abstract's ranges summarize Table 1 and Table 2; its human–grader estimates summarize Table 3. All metric-row identifiers are specified in their captions or adjacent text. Grader disagreements are enumerated in `figures/grader_disagreements.csv`. The author's final human labels were read for the comparison. Conclusions remain provisional given the limited single-author comparison and pending further human grading and correctness-sensitivity analysis.
 
 ## LLM Usage Statement
 
-GPT-6 Astra assisted with drafting and checking this report. Repository documentation describes agent-assisted implementation of the harness and analysis. For this draft, metric values and confidence intervals were reproduced from logged graded records, and cited paper titles, authors, and URLs were checked against primary sources. Human labels were not consulted. Full author review, affiliation confirmation, and the marked provenance checks remain pending; this statement does not imply independent human verification.
+GPT-6 Astra assisted with drafting and checking this report. Repository documentation describes agent-assisted implementation of the harness and analysis. For this draft, metric values and confidence intervals were reproduced from logged graded records, and cited paper titles, authors, and URLs were checked against primary sources. For this update, author Kartik's final 36 human strength labels were read for the comparison, and the human–grader estimates were taken from the regenerated `figures/grader_agreement.md`. Further human grading remains pending: 66 strength rows are blank in the other two label files, and no inter-human agreement estimate is available. Full author review, affiliation confirmation, and the marked provenance checks remain pending; this statement does not imply independent human verification.
