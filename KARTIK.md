@@ -95,6 +95,15 @@ Build this now against fake data, then run it on real data on Sunday night.
 
 ## 3. Hand-labeling: `scripts/label.py`
 
+**Type A is ready to label (15 Nov).** `scripts/pick_label_sample.py` picked 24 type-A conversations with seed 7. Each model has 6 conversations covering all 4 conditions, and no item appears twice. The first 5 (A01 to A05) are shared by all three labelers. The remaining 19 are split 7/6/6.
+
+- Read your blind sheet: `results/human/sheets/A_evidence__<name>.md`. It has no grader scores and no model names.
+- Fill in `results/human/labels_A_evidence__<name>.csv`. The columns follow `docs/CONTRACT.md` section 5, plus a leading `label_id`. `NA` marks a cell that does not apply to that turn. The `conv_id` contains the model name, so do not read it while labeling.
+- The mapping, which is not blind, is in `results/human/sample_A_evidence.csv`.
+- For type B, run `python scripts/pick_label_sample.py --type B_fact --seed 8` after Daksh's raw files land. Together that gives about 48 conversations, close to the planned 50.
+
+You therefore no longer need sampling code in `label.py`. Only the comparison of human labels and grader labels in `analyze.py` remains (see the last bullet).
+
 - Sample **50 conversations** from the graded files, stratified by model and condition, with a fixed seed.
 - Show each conversation in the terminal (or as a simple local HTML page) **without** the grader scores, so the labelers are blind to them.
 - Record: turn, strength (0 to 4), correct (turn 1), changed_answer (turn 3), note. Write rows to `results/human/labels.csv` in the format from `docs/CONTRACT.md` section 5.
