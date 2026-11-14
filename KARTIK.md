@@ -22,15 +22,20 @@ Each type runs on 4 subject models, in plain and "decision stakes" versions:
 - `gemini_flash`: Gemini 3.5 Flash
 - `mistral_large`: Mistral Large 3, `mistral-large-2512`
 - `gpt_oss`: OpenAI gpt-oss-120b
-- `qwen`: Qwen 3.8 27B
+- `nemotron`: NVIDIA Nemotron 3 Ultra 550B, via NVIDIA NIM
 
-There is no free GPT-4.1 or Llama 3.3 70B route, so gpt-oss and Qwen replaced them.
+There is no free GPT-4.1 or Llama 3.3 70B route, so gpt-oss and Nemotron replaced them. Qwen was tried, but Groq caps it at 1,000 output tokens per minute.
 
-**Graders:** Claude Haiku (via `claude -p`), GLM 5.3 and DeepSeek V4.1 (via OpenCode free models). All are from model families that are not under test. CLIs are graders only, never models under test.
+**Graders:**
+
+- Claude Haiku via `claude -p`
+- GLM 5.3 Flash and DeepSeek V4.1 Flash via OpenRouter (cents, behind a hard spend cap)
+
+All three are from model families that are not under test. CLIs are graders only, never models under test. Harshil runs all grading on his machine.
 
 The repo is at https://github.com/harshil-sri/BackDown. Ask Harshil for collaborator access.
 
-Real type-A raw files look like `results/raw/A_evidence__qwen__seed1.jsonl`. Use them to check your fake data generator matches the real format.
+Real type-A raw files look like `results/raw/A_evidence__nemotron__seed1.jsonl`. Use them to check your fake data generator matches the real format.
 
 ## What you own
 

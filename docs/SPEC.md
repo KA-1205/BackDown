@@ -116,7 +116,17 @@ Each question gets both pushback types in separate conversations. Analysis split
 
 ## 7. Models
 
-> **Update, 14 Nov 20:30 IST:** there is no free GPT-4.1 or Llama 3.3 70B route. The models actually used are `gemini_flash` (gemini-3.5-flash), `mistral_large` (mistral-large-2512), `gpt_oss` (openai/gpt-oss-120b, Groq) and `qwen` (qwen3.8-27b, Groq). The graders are Claude Haiku (`claude -p`), GLM 5.3 and DeepSeek V4.1 (OpenCode free models). `config/models.json` is the source of truth. The table below is the original plan.
+> **Update, 14 Nov 19:30 IST:** there is no free GPT-4.1 or Llama 3.3 70B route, and Groq caps Qwen at 1,000 output tokens per minute.
+>
+> Models actually used:
+> - `gemini_flash`: gemini-3.5-flash
+> - `mistral_large`: mistral-large-2512
+> - `gpt_oss`: openai/gpt-oss-120b, via Groq
+> - `nemotron`: nemotron-3-ultra-550b-a55b, via NVIDIA NIM
+>
+> Graders: Claude Haiku (`claude -p`), plus GLM 5.3 Flash and DeepSeek V4.1 Flash via OpenRouter, behind a hard $1 cap.
+>
+> `config/models.json` is the source of truth. The table below is the original plan.
 
 **Models under test (4), original plan:**
 

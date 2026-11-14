@@ -41,25 +41,29 @@ We work independently and meet **Sun 15 Nov (tomorrow)** with results.
 
 | Variable | Where to get it (all free) | Used for |
 |---|---|---|
-| `GROQ_API_KEY` | console.groq.com | `gpt_oss` (openai/gpt-oss-120b) and `qwen` (qwen/qwen3.8-27b), subject models |
+| `GROQ_API_KEY` | console.groq.com | `gpt_oss` (openai/gpt-oss-120b), subject model |
 | `GEMINI_API_KEY` | aistudio.google.com | `gemini_flash` (gemini-3.5-flash), subject model |
 | `MISTRAL_API_KEY` | console.mistral.ai (free "Experiment" plan) | `mistral_large` (mistral-large-2512), subject model |
-| `OPENROUTER_API_KEY` | openrouter.ai | Backup grader (`nemotron`) |
+| `NVIDIA_NIM_API_KEY` | build.nvidia.com | `nemotron` (nvidia/nemotron-3-ultra-550b-a55b), subject model |
 
 Put them in a `.env` file in the repo root (it is git-ignored). The harness loads it automatically.
 
-**Graders** run through CLI tools that are already logged in on your machine, so they use no API keys:
+**Why Qwen and Llama are not used:** Groq's free tier caps Qwen at 1,000 output tokens per minute, and Groq no longer serves Llama 3.3 70B. Nemotron on NVIDIA NIM replaced them.
 
-- `claude_haiku` uses Claude Code (`claude -p`) with your Claude Pro login.
-- `glm` and `deepseek` use OpenCode's free models (`opencode run`), if you have OpenCode installed.
+**Graders: Harshil grades everything on his machine**, so both types get exactly the same graders:
 
-CLIs are allowed **only as graders**, never as models under test. Check `config/models.json` for the exact routes. All routes were probed and working on 14 Nov.
+- `claude_haiku`: `claude -p`
+- `glm` and `deepseek`: OpenRouter, paid and behind a hard spend cap
 
-**Check your routes before the pilot:**
+You only push raw files. To check your pipeline locally, you can grade a few conversations with `--graders claude_haiku --limit 5` (this uses your Claude Pro login). CLIs are allowed **only as graders**, never as models under test.
+
+**Check your routes before the pilot** (all were probed and working on 14 Nov):
 
 ```bash
-python scripts/probe_models.py groq:openai/gpt-oss-120b groq:qwen/qwen3.8-27b gemini:gemini-3.5-flash mistral:mistral-large-2512
+python scripts/probe_models.py groq:openai/gpt-oss-120b gemini:gemini-3.5-flash mistral:mistral-large-2512 nvidia:nvidia/nemotron-3-ultra-550b-a55b
 ```
+
+If you have no Mistral key, Mistral Large also runs through Harshil's FreeLLMAPI. Tell Harshil, and he runs `mistral_large` for type B as well.
 
 - Never commit keys. `.env` is in `.gitignore`.
 
@@ -97,7 +101,7 @@ Look at Harshil's `templates/A_evidence.json` when it lands, and keep the tone c
 ### Step 4: Pilot run (about 30 min, once the harness is in the repo)
 
 ```bash
-python -m backdown.run --type B_fact --models gemini_flash,mistral_large,gpt_oss,qwen --seed 1 --limit 3
+python -m backdown.run --type B_fact --models gemini_flash,mistral_large,gpt_oss,nemotron --seed 1 --limit 3
 ```
 
 - Check that every model completes 3 turns and that `model_returned` matches the model you expected.
@@ -106,7 +110,7 @@ python -m backdown.run --type B_fact --models gemini_flash,mistral_large,gpt_oss
 ### Step 5: Full run (runs in the background for a few hours)
 
 ```bash
-python -m backdown.run --type B_fact --models gemini_flash,mistral_large,gpt_oss,qwen --seed 1
+python -m backdown.run --type B_fact --models gemini_flash,mistral_large,gpt_oss,nemotron --seed 1
 ```
 
 - 40 items × 2 stakes × 2 pushback types = 160 conversations per model (the spec counts 320 per model across both types A and B).
@@ -121,7 +125,7 @@ python -m backdown.run --type B_fact --models gemini_flash,mistral_large,gpt_oss
 python -m backdown.grade --type B_fact
 ```
 
-This uses the default graders (`claude_haiku`, `glm`, `deepseek`). If a grader CLI is missing on your machine, run only the ones you have (for example `--graders claude_haiku`) and push the raw files. Harshil grades the rest.
+Push your raw files (`results/raw/B_fact__*.jsonl`) and tell Harshil. He runs the full grading on his machine so both types use identical graders. Locally, only use `--graders claude_haiku --limit 5` as a check.
 
 ### Step 7: Rotation check (if time allows)
 
