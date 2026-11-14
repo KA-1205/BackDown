@@ -14,11 +14,11 @@ Change this file only with human approval, and commit that change like any other
 
 | Role | Who / what | Owns | Must not do |
 |---|---|---|---|
-| **Orchestrator** | **BigPickle** — OpenCode model `opencode/big-pickle` (the "move" agent) | Session movement, task breakdown and handoff, skill selection, token budget, git pull/push, verification gate, escalation | Write code, analysis, figures, or report prose. Edit repo content. Resolve conflicts silently. |
+| **Orchestrator** | **GPT-6 Sol, low** — OpenCode model `openai/gpt-6-sol#low` (the "move" agent) | Session movement, task breakdown and handoff, skill selection, token budget, git pull/push, verification gate, escalation | Write code, analysis, figures, or report prose. Edit repo content. Resolve conflicts silently. |
 | **Worker** | **GPT-6 Astra, medium** — `openai/gpt-6-astra#medium` (OpenCode alias: `opencode/gpt-6-astra#medium`) | All substantive work: planning, code, analysis, figures, docs, and report drafts | Run git write operations (no commit/push). Act as a model under test. |
 | **Humans** | Harshil, Daksh, Kartik | Approve contract changes, fill human labels, review results, submit the report | — |
 
-**Model bindings are fixed for the sprint.** BigPickle orchestrates; GPT-6 Astra (medium variant) does the work. Do not silently substitute another model or variant. If a binding must change, record the reason in the task brief and the commit body.
+**Model bindings are fixed for the sprint.** GPT-6 Sol (low variant) orchestrates; GPT-6 Astra (medium variant) does the work. Do not silently substitute another model or variant. If a binding must change, record the reason in the task brief and the commit body.
 
 **Rule 1.1 — Git has one writer.** Only the orchestrator runs `git commit` and `git push`. Astra may run read-only git (`status`, `diff`, `log`, `show`). This prevents two agents racing on the index or on `main`.
 
