@@ -359,6 +359,124 @@ def write_metrics_table(rows, out_dir):
     return path
 
 
+def _table_number(value):
+    """Accept both computed rows and CSV strings; normalize unavailable values."""
+    if value in (None, "", "NA"):
+        return None
+    number = float(value)
+    return number if math.isfinite(number) else None
+
+
+def write_metrics_markdown(rows, out_dir):
+    """Render the CSV schema and order with display-only rounding."""
+    lines = [
+        "95% item-cluster percentile bootstrap, 1000 resamples, seed 12345 "
+        "(row-specific deterministic seed offsets); `n` is records while "
+        "`n_items` is distinct items. For paired contrasts, `n` counts matched pairs.",
+        "",
+        "| " + " | ".join(METRICS_COLUMNS) + " |",
+        "| " + " | ".join(["---"] * len(METRICS_COLUMNS)) + " |",
+    ]
+    for row in rows:
+        cells = []
+        for key in METRICS_COLUMNS:
+            value = row[key]
+            if key in ("value", "ci_low", "ci_high"):
+                number = _table_number(value)
+                value = "NA" if number is None else f"{number:.3f}"
+            cells.append(str(value))
+        lines.append("| " + " | ".join(cells) + " |")
+    path = Path(out_dir) / "metrics_table.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return path
+
+
+def write_headline_figure(rows, out_dir, kind="A_evidence"):
+    """Plot one type's independent discrimination against pooled overselling."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    models = ("gemini_lite", "gpt_oss", "mistral_large", "nemotron")
+    markers = ("o", "s", "^", "D")
+    styles = ("-", "--", "-.", ":")
+    selected = {
+        (row["model"], row["stakes"], row["metric"]): row for row in rows
+        if row["type"] == kind and (
+            (row["metric"] == "overselling" and row["pushback"] == "both")
+            or (row["metric"] == "discrimination"
+                and row["pushback"] == "warranted_minus_unwarranted"))
+    }
+    path = Path(out_dir) / "headline.png"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with plt.rc_context({"font.family": "DejaVu Sans", "font.size": 9}):
+        fig, ax = plt.subplots(figsize=(8, 6))
+        try:
+            fig.subplots_adjust(left=0.12, right=0.73, bottom=0.23, top=0.85)
+            omissions = []
+            for i, (model, marker, style) in enumerate(zip(models, markers, styles)):
+                points = {}
+                for j, stakes in enumerate(("plain", "stakes")):
+                    pair = [selected.get((model, stakes, metric), {})
+                            for metric in ("overselling", "discrimination")]
+                    values = [_table_number(row.get("value")) for row in pair]
+                    if any(value is None for value in values):
+                        omissions.append(f"{model}/{stakes}")
+                        continue
+                    x, y = values
+                    points[stakes] = (x, y)
+                    # Draw CI endpoints directly: percentile CIs need not bracket
+                    # the estimate. Missing CIs do not suppress a valid point.
+                    for axis, row in enumerate(pair):
+                        low, high = (_table_number(row.get(key))
+                                     for key in ("ci_low", "ci_high"))
+                        if low is None or high is None:
+                            omissions.append(f"{model}/{stakes} {'x' if axis == 0 else 'y'} CI")
+                            continue
+                        if axis == 0:
+                            ax.plot([low, high], [y, y], color="0.55",
+                                    linestyle=style, linewidth=0.9, zorder=1)
+                            ax.plot([low, high], [y, y], "|", color="0.55")
+                        else:
+                            ax.plot([x, x], [low, high], color="0.55",
+                                    linestyle=style, linewidth=0.9, zorder=1)
+                            ax.plot([x, x], [low, high], "_", color="0.55")
+                    ax.plot(x, y, marker=marker, markersize=7, color="black",
+                            markerfacecolor="white" if stakes == "plain" else "black",
+                            linestyle="none", zorder=4)
+                    ax.annotate(f"{model}\n{stakes}", xy=(x, y),
+                                xytext=(1.04, 0.95 - (2 * i + j) * 0.13),
+                                textcoords="axes fraction", va="center", fontsize=8,
+                                arrowprops={"arrowstyle": "-", "color": "0.7",
+                                            "linewidth": 0.6},
+                                bbox={"facecolor": "white", "edgecolor": "none", "pad": 1})
+                if len(points) == 2:
+                    ax.annotate("", xy=points["stakes"], xytext=points["plain"],
+                                arrowprops={"arrowstyle": "-|>", "color": "black",
+                                            "linestyle": style, "linewidth": 1.4},
+                                zorder=3)
+            ax.axvline(0, color="0.35", linewidth=0.8)
+            ax.axhline(0, color="0.35", linewidth=0.8)
+            ax.margins(x=0.08, y=0.12)
+            ax.set_xlabel("Overselling (both pushbacks; lower is better)")
+            ax.set_ylabel("Discrimination (warranted − unwarranted; higher is better)")
+            fig.suptitle("BackDown: lower overselling, higher discrimination is better",
+                         fontsize=12, y=0.96)
+            ax.set_title(f"{kind} · plain → stakes", fontsize=10)
+            fig.text(0.12, 0.12, "Open markers: plain; filled: stakes. Arrows: plain → stakes.\n"
+                     "Error bars: 95% item-cluster percentile bootstrap (1000 resamples).",
+                     fontsize=8)
+            if omissions:
+                from textwrap import fill
+                fig.text(0.12, 0.025, fill("Omitted (missing data): " + ", ".join(omissions), 105),
+                         fontsize=7)
+            fig.savefig(path, dpi=200, metadata={"Software": None})
+        finally:
+            plt.close(fig)
+    return path
+
+
 def load_graded(path):
     """Read immediate *.jsonl children in filename/line order, latest success wins.
 
@@ -615,6 +733,8 @@ def main(argv=None):
     write_metrics_table(rows, args.out)
     # Preserve the metrics-only CLI output for inputs with no strength scores.
     if any(_strengths(record, turn) for record in result["records"] for turn in (1, 2, 3)):
+        print(f"output: {write_metrics_markdown(rows, args.out)}")
+        print(f"output: {write_headline_figure(rows, args.out)}")
         agreement = grader_agreement(result["records"])
         human = compare_human(result["records"], args.human)
         paths = write_agreement_reports(agreement, human, args.out)
