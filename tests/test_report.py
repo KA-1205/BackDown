@@ -15,13 +15,15 @@ REQUIRED_HEADINGS = [
     "## 2. Related Work",
     "## 3. Methods",
     "## 4. Results",
-    "### 4.1 Type A: summarizing weak evidence",
-    "### 4.2 Type B: short factual questions",
+    "### 4.1 Evidence: weak and ambiguous study summaries",
+    "### 4.2 Fact: short factual questions",
     "### 4.3 Rotation check (seed 2)",
     "### 4.4 Grader reliability",
-    "### 4.5 Human vs grader",
+    "### 4.5 Human versus grader",
+    "### 4.6 Explicit-confidence ablation",
     "## 5. Discussion and Limitations",
     "## 6. Conclusion",
+    "## 7. Future Work",
     "## Code and Data",
     "## References",
     "## Appendix",
@@ -29,17 +31,17 @@ REQUIRED_HEADINGS = [
     "## LLM Usage Statement",
 ]
 
-TYPE_B_HEADING = "### 4.2 Type B: short factual questions"
+FACT_HEADING = "### 4.2 Fact: short factual questions"
 
 
 def read_report():
     return REPORT.read_text(encoding="utf-8")
 
 
-def type_b_section(text):
-    """Return the lines of the type-B section, excluding the heading."""
+def fact_section(text):
+    """Return the lines of the Fact section, excluding the heading."""
     lines = text.splitlines()
-    start = lines.index(TYPE_B_HEADING) + 1
+    start = lines.index(FACT_HEADING) + 1
     end = start
     while end < len(lines) and not lines[end].startswith("#"):
         end += 1
@@ -58,16 +60,30 @@ class ReportDraftTest(unittest.TestCase):
             positions.append(text.index(heading))
         self.assertEqual(positions, sorted(positions), "headings are out of order")
 
-    def test_no_stale_type_b_placeholder(self):
+    def test_no_stale_placeholders(self):
         text = read_report()
         self.assertNotIn("PLACEHOLDER", text)
         self.assertNotIn("no type-B data", text)
 
-    def test_type_b_section_reports_verified_results(self):
-        body = "\n".join(type_b_section(read_report()))
+    def test_fact_section_reports_verified_results(self):
+        body = "\n".join(fact_section(read_report()))
         for value in ("3.887", "3.442", "1.367", "27/80", "9/80"):
             self.assertIn(value, body)
         self.assertNotIn("TODO", body)
+
+    def test_sets_use_display_names(self):
+        text = read_report()
+        self.assertIn("**Evidence** (`A_evidence`)", text)
+        self.assertIn("**Fact** (`B_fact`)", text)
+        self.assertNotIn("Type A", text)
+        self.assertNotIn("Type B", text)
+        self.assertNotIn("type A", text)
+        self.assertNotIn("type B", text)
+
+    def test_sprint_attribution_links_source(self):
+        text = read_report()
+        self.assertIn("**MisleadBench** and **FlipRate**", text)
+        self.assertIn("https://apartresearch.com/sprints/ai-x-epistemics-research-sprint-2026-11-13-to-2026-11-15", text)
 
     def test_abstract_is_within_template_limit(self):
         text = read_report()
@@ -80,23 +96,39 @@ class ReportDraftTest(unittest.TestCase):
         self.assertIn("../figures/headline.png", text)
         self.assertIn("../figures/headline_B_fact.png", text)
         for caption in ("**Figure 1.", "**Figure 2.",
-                        "**Table 1.", "**Table 2.", "**Table 3.", "**Table 4."):
+                        "**Table 1.", "**Table 2.", "**Table 3.", "**Table 4.",
+                        "**Table 5.", "**Table 6."):
             self.assertIn(caption, text)
 
     def test_human_comparison_reports_complete_labels_and_limits(self):
-        human = read_report().split("### 4.5 Human vs grader", 1)[1].split("\n## ", 1)[0]
-        self.assertIn("204 filled rows, none blank", human)
+        human = read_report().split("### 4.5 Human versus grader", 1)[1].split("\n## ", 1)[0]
+        self.assertIn("**204 rows, none blank**", human)
         self.assertIn("**Table 4.", human)
-        self.assertIn("| Harshil | Type A | 33 | 0.454545 | 0.606061 | 0.939394 |", human)
-        self.assertIn("| Daksh | Type A | 33 | 0.636364 | 0.484848 | 0.878788 |", human)
-        self.assertIn("| Kartik | Type A | 36 | 0.722222 | 0.361111 | 0.916667 |", human)
-        self.assertIn("| Harshil | Type B | 33 | 0.393939 | 0.818182 | 0.909091 |", human)
-        self.assertIn("| Daksh | Type B | 33 | 0.242424 | 0.787879 | 0.969697 |", human)
-        self.assertIn("| Kartik | Type B | 36 | 0.388889 | 0.666667 | 0.944444 |", human)
+        self.assertIn("| Harshil | Evidence | 33 | 0.454545 | 0.606061 | 0.939394 |", human)
+        self.assertIn("| Daksh | Evidence | 33 | 0.636364 | 0.484848 | 0.878788 |", human)
+        self.assertIn("| Kartik | Evidence | 36 | 0.722222 | 0.361111 | 0.916667 |", human)
+        self.assertIn("| Harshil | Fact | 33 | 0.393939 | 0.818182 | 0.909091 |", human)
+        self.assertIn("| Daksh | Fact | 33 | 0.242424 | 0.787879 | 0.969697 |", human)
+        self.assertIn("| Kartik | Fact | 36 | 0.388889 | 0.666667 | 0.944444 |", human)
         self.assertIn("exact 0.267", human)
         self.assertIn("exact 0.733", human)
-        self.assertIn("complete but limited", human)
+        self.assertIn("not external validation", human)
         self.assertNotIn("PENDING", human)
+
+    def test_ablation_section_reports_both_experiments(self):
+        ablation = read_report().split("### 4.6 Explicit-confidence ablation", 1)[1].split("\n## ", 1)[0]
+        self.assertIn("#### 4.6.1 Evidence", ablation)
+        self.assertIn("#### 4.6.2 Fact", ablation)
+        self.assertIn("**Table 5.", ablation)
+        self.assertIn("**Table 6.", ablation)
+        self.assertIn("2.35 → 3.90", ablation)
+        self.assertIn("3.19 → 2.92", ablation)
+
+    def test_llm_statement_names_assistants(self):
+        statement = read_report().split("## LLM Usage Statement", 1)[1]
+        self.assertIn("Claude Fable 5.2", statement)
+        self.assertIn("GPT-6 Astra", statement)
+        self.assertIn("Claude Haiku", statement)
 
     def test_editable_document_embeds_figures_and_tables(self):
         self.assertTrue(DOCX.is_file())
@@ -114,7 +146,8 @@ class ReportDraftTest(unittest.TestCase):
             self.assertNotIn("PLACEHOLDER", text)
             self.assertIn("github.com/KA-1205/BackDown", text)
             self.assertIn("3.887", text)
-            self.assertEqual(len(document.findall(".//w:tbl", ns)), 4)
+            self.assertIn("Claude Fable 5.2", text)
+            self.assertEqual(len(document.findall(".//w:tbl", ns)), 6)
             self.assertEqual(len(document.findall(".//w:drawing", ns)), 2)
 
 

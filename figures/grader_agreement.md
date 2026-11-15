@@ -50,7 +50,7 @@ Combined strength is the median of available grader scores.
 | 3 | codex | 68 | 0.632353 | 0.588235 | 0.852941 |
 | 3 | glm | 68 | 0.970588 | 0.500000 | 0.779412 |
 
-### A_evidence (combined; filled 102, blank 0)
+### Evidence (combined; filled 102, blank 0)
 
 | Turn | Comparison | n | MAE | Exact | Within-1 |
 | --- | --- | ---: | ---: | ---: | ---: |
@@ -59,7 +59,7 @@ Combined strength is the median of available grader scores.
 | 2 | combined | 34 | 0.647059 | 0.411765 | 0.941176 |
 | 3 | combined | 34 | 0.705882 | 0.441176 | 0.852941 |
 
-### B_fact (combined; filled 102, blank 0)
+### Fact (combined; filled 102, blank 0)
 
 | Turn | Comparison | n | MAE | Exact | Within-1 |
 | --- | --- | ---: | ---: | ---: | ---: |
@@ -68,22 +68,22 @@ Combined strength is the median of available grader scores.
 | 2 | combined | 34 | 0.352941 | 0.705882 | 0.941176 |
 | 3 | combined | 34 | 0.500000 | 0.735294 | 0.882353 |
 
-### By labeler and type (combined)
+### By labeler and set (combined)
 
-| Labeler | Type | n | MAE | Exact | Within-1 |
+| Labeler | Set | n | MAE | Exact | Within-1 |
 | --- | --- | ---: | ---: | ---: | ---: |
-| daksh | A_evidence | 33 | 0.636364 | 0.484848 | 0.878788 |
-| daksh | B_fact | 33 | 0.242424 | 0.787879 | 0.969697 |
-| harshil | A_evidence | 33 | 0.454545 | 0.606061 | 0.939394 |
-| harshil | B_fact | 33 | 0.393939 | 0.818182 | 0.909091 |
-| kartik | A_evidence | 36 | 0.722222 | 0.361111 | 0.916667 |
-| kartik | B_fact | 36 | 0.388889 | 0.666667 | 0.944444 |
+| daksh | Evidence | 33 | 0.636364 | 0.484848 | 0.878788 |
+| daksh | Fact | 33 | 0.242424 | 0.787879 | 0.969697 |
+| harshil | Evidence | 33 | 0.454545 | 0.606061 | 0.939394 |
+| harshil | Fact | 33 | 0.393939 | 0.818182 | 0.909091 |
+| kartik | Evidence | 36 | 0.722222 | 0.361111 | 0.916667 |
+| kartik | Fact | 36 | 0.388889 | 0.666667 | 0.944444 |
 
 ### Inter-human agreement (strength)
 
 Only turns scored by two or more labelers contribute.
 
-| Type | Pairs | Conversations | MAE | Exact | Within-1 |
+| Set | Pairs | Conversations | MAE | Exact | Within-1 |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| A_evidence | 45 | 5 | 0.977778 | 0.266667 | 0.755556 |
-| B_fact | 45 | 5 | 0.266667 | 0.733333 | 1.000000 |
+| Evidence | 45 | 5 | 0.977778 | 0.266667 | 0.755556 |
+| Fact | 45 | 5 | 0.266667 | 0.733333 | 1.000000 |

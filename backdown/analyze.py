@@ -393,6 +393,14 @@ def write_metrics_markdown(rows, out_dir):
     return path
 
 
+TYPE_NAMES = {"A_evidence": "Evidence", "B_fact": "Fact"}
+
+
+def type_name(kind):
+    """Return the human-readable set name, keeping technical IDs unchanged."""
+    return TYPE_NAMES.get(kind, kind)
+
+
 def write_headline_figure(rows, out_dir, kind="A_evidence", filename=None):
     """Plot one type's independent discrimination against pooled overselling."""
     import matplotlib
@@ -464,7 +472,7 @@ def write_headline_figure(rows, out_dir, kind="A_evidence", filename=None):
             ax.set_ylabel("Discrimination (warranted − unwarranted; higher is better)")
             fig.suptitle("BackDown: lower overselling, higher discrimination is better",
                          fontsize=12, y=0.96)
-            ax.set_title(f"{kind} · plain → stakes", fontsize=10)
+            ax.set_title(f"{type_name(kind)} · plain → stakes", fontsize=10)
             fig.text(0.12, 0.12, "Open markers: plain; filled: stakes. Arrows: plain → stakes.\n"
                      "Error bars: 95% item-cluster percentile bootstrap (1000 resamples).",
                      fontsize=8)
@@ -792,7 +800,7 @@ def write_agreement_reports(agreement, human, out_dir):
         for kind, section in human.get("by_type", {}).items():
             filled = human.get("filled_by_type", {}).get(kind, 0)
             blank = human.get("blank_by_type", {}).get(kind, 0)
-            lines.extend(["", f"### {kind} (combined; filled {filled}, blank {blank})", "",
+            lines.extend(["", f"### {type_name(kind)} (combined; filled {filled}, blank {blank})", "",
                           *header])
             for turn, entries in [("All", section["overall"]), *section["turns"].items()]:
                 row = entries["combined"]
@@ -807,19 +815,19 @@ def write_agreement_reports(agreement, human, out_dir):
             if section["overall"]["combined"]["n"]
         ]
         if labeler_rows:
-            lines.extend(["", "### By labeler and type (combined)", "",
-                          "| Labeler | Type | n | MAE | Exact | Within-1 |",
+            lines.extend(["", "### By labeler and set (combined)", "",
+                          "| Labeler | Set | n | MAE | Exact | Within-1 |",
                           "| --- | --- | ---: | ---: | ---: | ---: |"])
             for labeler, kind, row in labeler_rows:
-                lines.append(f"| {labeler} | {kind} | {row['n']} | {_display(row['mae'])} | "
+                lines.append(f"| {labeler} | {type_name(kind)} | {row['n']} | {_display(row['mae'])} | "
                              f"{_display(row['exact'])} | {_display(row['within_1'])} |")
         if human.get("inter_human"):
             lines.extend(["", "### Inter-human agreement (strength)", "",
                           "Only turns scored by two or more labelers contribute.", "",
-                          "| Type | Pairs | Conversations | MAE | Exact | Within-1 |",
+                          "| Set | Pairs | Conversations | MAE | Exact | Within-1 |",
                           "| --- | ---: | ---: | ---: | ---: | ---: |"])
             for kind, row in human["inter_human"].items():
-                lines.append(f"| {kind} | {row['n']} | {row['conversations']} | "
+                lines.append(f"| {type_name(kind)} | {row['n']} | {row['conversations']} | "
                              f"{_display(row['mae'])} | {_display(row['exact'])} | "
                              f"{_display(row['within_1'])} |")
     md_path = out_dir / "grader_agreement.md"

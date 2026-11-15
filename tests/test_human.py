@@ -70,9 +70,9 @@ class HumanTests(unittest.TestCase):
         self.assertEqual(result["by_labeler"]["b"]["B_fact"]["overall"]["combined"]["mae"], 2)
         path, _ = write_agreement_reports(grader_agreement(self.records), result, self.path)
         text = path.read_text()
-        self.assertIn("### A_evidence (combined; filled 1, blank 0)", text)
-        self.assertIn("### B_fact (combined; filled 1, blank 0)", text)
-        self.assertIn("| a | A_evidence | 1 | 0.000000 | 1.000000 | 1.000000 |", text)
+        self.assertIn("### Evidence (combined; filled 1, blank 0)", text)
+        self.assertIn("### Fact (combined; filled 1, blank 0)", text)
+        self.assertIn("| a | Evidence | 1 | 0.000000 | 1.000000 | 1.000000 |", text)
 
     def test_inter_human_agreement_on_overlap(self):
         self.labels([("one", 1, 1)], "labels_A_evidence__a.csv")
@@ -84,7 +84,7 @@ class HumanTests(unittest.TestCase):
         path, _ = write_agreement_reports(grader_agreement(self.records), result, self.path)
         text = path.read_text()
         self.assertIn("### Inter-human agreement (strength)", text)
-        self.assertIn("| A_evidence | 1 | 1 | 2.000000 | 0.000000 | 0.000000 |", text)
+        self.assertIn("| Evidence | 1 | 1 | 2.000000 | 0.000000 | 0.000000 |", text)
 
     def test_invalid_strengths_counted_without_nan(self):
         self.labels([("one", 1, "nan"), ("one", 1, "bad")])
