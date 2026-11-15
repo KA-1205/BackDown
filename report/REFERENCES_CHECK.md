@@ -28,7 +28,8 @@ notes.
 - `backdown/grade.py` defines initial correctness by stance/answer agreement; `docs/CONTRACT.md` also requires type-A strength within one point of supported strength. **The correctness-definition sensitivity analysis is not computed.** The report labels correctness-conditioned results provisional.
 - `figures/caveats.md` and the report note that strength grades refer to the model's main claim while the gold mapping is anchored to the affirmative question. This directional mismatch is an interpretation risk, not a measured correction.
 - Template selection depends on stakes and pushback condition, so conditions use separate conversations. Stakes contrasts are descriptive; they are not wording-controlled causal effects.
-- Human–grader results describe Kartik's completed labels on both types: a small selected sample with repeated turns within 24 conversations, not independent multi-human validation. **132 strength rows remain blank** across the other four label files (type-A and type-B Harshil and Daksh, 33 rows each).
+- Human–grader results describe the completed labels from Harshil (type A) and Kartik (types A and B): small selected samples with repeated turns, not independent multi-human validation. **99 strength rows remain blank** across the three unfilled files (Daksh type A and type B, Harshil type B, 33 rows each). Per-labeler combined MAE is 0.454545 (Harshil type A, n=33), 0.722222 (Kartik type A, n=36), and 0.388889 (Kartik type B, n=36); pooled MAE is 0.523810 over 105 rows.
+- Recomputed inter-human strength agreement on the 15 type-A turns scored by both Harshil and Kartik, spanning 5 overlapping conversations: MAE 1.000000, exact 0.200000, within-1 0.800000. This is a preliminary estimate on a small partial overlap, not a stable multi-labeler agreement estimate.
 - Type-B overselling is a different construct from type-A overselling (mean turn-1 strength on wrong answers versus strength minus supported strength). The report does not compare the two as if they were the same scale.
 - The code repository link uses the configured `origin` remote, `https://github.com/KA-1205/BackDown.git`.
 
@@ -36,8 +37,8 @@ notes.
 
 - Confirm final author order and final manuscript approval. All three authors' names, emails, and shared affiliation are now filled.
 - Check pagination, typography, table widths, and caption placement in the actual Google Doc/PDF. The local DOCX is editable but no Word/LibreOffice renderer is installed here, so visual pagination has **not** been checked against the template or the eight-page limit.
-- Complete further independent human grading and the CONTRACT-correctness sensitivity before finalizing interpretive claims. Kartik's 72 labels do not resolve either.
-- Add Harshil's and Daksh's labels before making any inter-human agreement claim.
+- Complete further independent human grading and the CONTRACT-correctness sensitivity before finalizing interpretive claims. The current 105 labels do not resolve either.
+- Fill the remaining 99 strength rows (Daksh type A and B, Harshil type B) before making any broad inter-human agreement claim. The current 15-turn type-A overlap supports only a preliminary estimate.
 - Confirm the required all-code-written-during-the-sprint provenance statement. The repository statement is supported by git history beginning 14 November 2026, but author confirmation is still appropriate before submission.
 - The report-drafting request named GPT-6 Astra (high) through a subagent dispatch; the provider returned HTTP 400, so the revision was completed in the orchestrating session. The `LLM Usage Statement` credits GPT-6 Astra with drafting and checking; authors should confirm that attribution before submitting.
 

@@ -66,10 +66,25 @@ class HumanTests(unittest.TestCase):
         self.assertEqual(result["by_type"]["A_evidence"]["overall"]["combined"]["mae"], 0)
         self.assertEqual(result["by_type"]["B_fact"]["overall"]["combined"]["mae"], 2)
         self.assertEqual(result["filled_by_type"], {"A_evidence": 1, "B_fact": 1})
+        self.assertEqual(result["by_labeler"]["a"]["A_evidence"]["overall"]["combined"]["mae"], 0)
+        self.assertEqual(result["by_labeler"]["b"]["B_fact"]["overall"]["combined"]["mae"], 2)
         path, _ = write_agreement_reports(grader_agreement(self.records), result, self.path)
         text = path.read_text()
         self.assertIn("### A_evidence (combined; filled 1, blank 0)", text)
         self.assertIn("### B_fact (combined; filled 1, blank 0)", text)
+        self.assertIn("| a | A_evidence | 1 | 0.000000 | 1.000000 | 1.000000 |", text)
+
+    def test_inter_human_agreement_on_overlap(self):
+        self.labels([("one", 1, 1)], "labels_A_evidence__a.csv")
+        self.labels([("one", 1, 3)], "labels_A_evidence__b.csv")
+        result = compare_human(self.records, self.path)
+        self.assertEqual(result["inter_human"]["A_evidence"],
+                         {"n": 1, "mae": 2, "exact": 0, "within_1": 0,
+                          "conversations": 1})
+        path, _ = write_agreement_reports(grader_agreement(self.records), result, self.path)
+        text = path.read_text()
+        self.assertIn("### Inter-human agreement (strength)", text)
+        self.assertIn("| A_evidence | 1 | 1 | 2.000000 | 0.000000 | 0.000000 |", text)
 
     def test_invalid_strengths_counted_without_nan(self):
         self.labels([("one", 1, "nan"), ("one", 1, "bad")])

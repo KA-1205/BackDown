@@ -662,20 +662,28 @@ def compare_human(records, human_dir):
 
     differences = empty()
     by_type = {}
+    by_labeler = {}
+    units = {}
     result = {"filled": 0, "blank": 0, "invalid": 0, "unmatched": 0,
-              "filled_by_type": {}, "blank_by_type": {}}
+              "filled_by_type": {}, "blank_by_type": {},
+              "filled_by_labeler": {}, "blank_by_labeler": {}}
     for path in sorted(Path(human_dir).glob("labels_*.csv")):
-        kind = path.stem.split("__")[0].removeprefix("labels_")
+        prefix, _, labeler = path.stem.partition("__")
+        kind = prefix.removeprefix("labels_")
+        labeler = labeler or "unknown"
         type_differences = by_type.setdefault(kind, empty())
+        labeler_type = by_labeler.setdefault(labeler, {}).setdefault(kind, empty())
         with path.open(newline="", encoding="utf-8") as stream:
             for row in csv.DictReader(stream):
                 strength = (row.get("strength") or "").strip()
                 if not strength:
                     result["blank"] += 1
                     result["blank_by_type"][kind] = result["blank_by_type"].get(kind, 0) + 1
+                    result["blank_by_labeler"][labeler] = result["blank_by_labeler"].get(labeler, 0) + 1
                     continue
                 result["filled"] += 1
                 result["filled_by_type"][kind] = result["filled_by_type"].get(kind, 0) + 1
+                result["filled_by_labeler"][labeler] = result["filled_by_labeler"].get(labeler, 0) + 1
                 try:
                     strength = float(strength)
                 except ValueError:
@@ -693,14 +701,37 @@ def compare_human(records, human_dir):
                     result["unmatched"] += 1
                     continue
                 combined = combine_grades(record)["strength"][turn]
+                units.setdefault((kind, record["conv_id"], turn), {})[labeler] = strength
                 for name, score in {"combined": combined, **scores}.items():
                     gap = abs(strength - score)
                     differences[turn][name].append(gap)
                     type_differences[turn][name].append(gap)
+                    labeler_type[turn][name].append(gap)
     result.update(_human_result(differences, names))
     result["by_type"] = {
         kind: _human_result(type_differences, names)
         for kind, type_differences in sorted(by_type.items())
+    }
+    result["by_labeler"] = {
+        labeler: {
+            kind: _human_result(type_differences, names)
+            for kind, type_differences in sorted(entry.items())
+        }
+        for labeler, entry in sorted(by_labeler.items())
+    }
+    pair_differences = {}
+    pair_conversations = {}
+    for (kind, conv_id, _turn), labelers in units.items():
+        ordered = sorted(labelers)
+        for first in range(len(ordered)):
+            for second in range(first + 1, len(ordered)):
+                gap = abs(labelers[ordered[first]] - labelers[ordered[second]])
+                pair_differences.setdefault(kind, []).append(gap)
+                pair_conversations.setdefault(kind, set()).add(conv_id)
+    result["inter_human"] = {
+        kind: {**_human_summary(values),
+               "conversations": len(pair_conversations[kind])}
+        for kind, values in sorted(pair_differences.items())
     }
     return result
 
@@ -769,6 +800,28 @@ def write_agreement_reports(agreement, human, out_dir):
                     continue
                 lines.append(f"| {turn} | combined | {row['n']} | {_display(row['mae'])} | "
                              f"{_display(row['exact'])} | {_display(row['within_1'])} |")
+        labeler_rows = [
+            (labeler, kind, section["overall"]["combined"])
+            for labeler, kinds in human.get("by_labeler", {}).items()
+            for kind, section in kinds.items()
+            if section["overall"]["combined"]["n"]
+        ]
+        if labeler_rows:
+            lines.extend(["", "### By labeler and type (combined)", "",
+                          "| Labeler | Type | n | MAE | Exact | Within-1 |",
+                          "| --- | --- | ---: | ---: | ---: | ---: |"])
+            for labeler, kind, row in labeler_rows:
+                lines.append(f"| {labeler} | {kind} | {row['n']} | {_display(row['mae'])} | "
+                             f"{_display(row['exact'])} | {_display(row['within_1'])} |")
+        if human.get("inter_human"):
+            lines.extend(["", "### Inter-human agreement (strength)", "",
+                          "Only turns scored by two or more labelers contribute.", "",
+                          "| Type | Pairs | Conversations | MAE | Exact | Within-1 |",
+                          "| --- | ---: | ---: | ---: | ---: | ---: |"])
+            for kind, row in human["inter_human"].items():
+                lines.append(f"| {kind} | {row['n']} | {row['conversations']} | "
+                             f"{_display(row['mae'])} | {_display(row['exact'])} | "
+                             f"{_display(row['within_1'])} |")
     md_path = out_dir / "grader_agreement.md"
     md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return md_path, csv_path
