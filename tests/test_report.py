@@ -1,4 +1,4 @@
-"""The drafted report follows the template while type B stays unclaimed."""
+"""The drafted report covers both types and keeps pending validation explicit."""
 
 import re
 import unittest
@@ -8,7 +8,6 @@ from zipfile import ZipFile
 
 REPORT = Path(__file__).resolve().parent.parent / "report" / "REPORT.md"
 DOCX = REPORT.with_name("BackDown-draft.docx")
-PLACEHOLDER = "PLACEHOLDER — no type-B data exists in this repository yet"
 
 REQUIRED_HEADINGS = [
     "## Abstract",
@@ -17,9 +16,10 @@ REQUIRED_HEADINGS = [
     "## 3. Methods",
     "## 4. Results",
     "### 4.1 Type A: summarizing weak evidence",
-    "### 4.2 Type B: hard factual questions",
-    "### 4.3 Grader reliability",
-    "### 4.4 Human vs grader",
+    "### 4.2 Type B: short factual questions",
+    "### 4.3 Rotation check (seed 2)",
+    "### 4.4 Grader reliability",
+    "### 4.5 Human vs grader",
     "## 5. Discussion and Limitations",
     "## 6. Conclusion",
     "## Code and Data",
@@ -29,7 +29,7 @@ REQUIRED_HEADINGS = [
     "## LLM Usage Statement",
 ]
 
-TYPE_B_HEADING = "### 4.2 Type B: hard factual questions"
+TYPE_B_HEADING = "### 4.2 Type B: short factual questions"
 
 
 def read_report():
@@ -48,7 +48,7 @@ def type_b_section(text):
 
 class ReportDraftTest(unittest.TestCase):
     def test_report_exists(self):
-        self.assertTrue(REPORT.is_file(), f"missing scaffold: {REPORT}")
+        self.assertTrue(REPORT.is_file(), f"missing report: {REPORT}")
 
     def test_required_headings_present_in_order(self):
         text = read_report()
@@ -58,40 +58,16 @@ class ReportDraftTest(unittest.TestCase):
             positions.append(text.index(heading))
         self.assertEqual(positions, sorted(positions), "headings are out of order")
 
-    def test_placeholder_is_visible_and_unique(self):
+    def test_no_stale_type_b_placeholder(self):
         text = read_report()
-        self.assertEqual(text.count(PLACEHOLDER), 1)
-        self.assertIn("> " + PLACEHOLDER, text)
+        self.assertNotIn("PLACEHOLDER", text)
+        self.assertNotIn("no type-B data", text)
 
-    def test_type_b_body_is_only_the_placeholder(self):
-        body = [line for line in type_b_section(read_report()) if line.strip()]
-        self.assertEqual(body, ["> " + PLACEHOLDER])
-
-    def test_type_b_section_has_no_numbers(self):
+    def test_type_b_section_reports_verified_results(self):
         body = "\n".join(type_b_section(read_report()))
-        self.assertFalse(
-            any(char.isdigit() for char in body),
-            "type-B section must not carry a number",
-        )
-
-    def test_type_b_section_makes_no_claim_and_names_nobody(self):
-        lowered = "\n".join(type_b_section(read_report())).lower()
-        for word in (
-            "daksh",
-            "harshil",
-            "kartik",
-            "owner",
-            "will deliver",
-            "delivered by",
-            "significant",
-            "overselling",
-            "discrimination",
-            "capitulation",
-            "mean",
-            "rate",
-            "%",
-        ):
-            self.assertNotIn(word, lowered)
+        for value in ("3.887", "3.442", "1.367", "27/80", "9/80"):
+            self.assertIn(value, body)
+        self.assertNotIn("TODO", body)
 
     def test_abstract_is_within_template_limit(self):
         text = read_report()
@@ -99,36 +75,41 @@ class ReportDraftTest(unittest.TestCase):
         self.assertGreaterEqual(len(re.findall(r"\b[\w-]+\b", abstract)), 150)
         self.assertLessEqual(len(re.findall(r"\b[\w-]+\b", abstract)), 250)
 
-    def test_numbered_figure_and_tables_have_captions(self):
+    def test_numbered_figures_and_tables_have_captions(self):
         text = read_report()
-        self.assertIn("![", text)
         self.assertIn("../figures/headline.png", text)
-        for caption in ("**Figure 1.", "**Table 1.", "**Table 2."):
+        self.assertIn("../figures/headline_B_fact.png", text)
+        for caption in ("**Figure 1.", "**Figure 2.",
+                        "**Table 1.", "**Table 2.", "**Table 3.", "**Table 4."):
             self.assertIn(caption, text)
 
     def test_human_comparison_reports_available_labels_and_pending_validation(self):
-        human = read_report().split("### 4.4 Human vs grader", 1)[1].split("\n## ", 1)[0]
+        human = read_report().split("### 4.5 Human vs grader", 1)[1].split("\n## ", 1)[0]
         self.assertIn("PENDING", human)
-        self.assertIn("**Table 3.", human)
+        self.assertIn("**Table 4.", human)
         self.assertIn("| All turns | 36 | 0.722222 | 0.361111 | 0.916667 |", human)
-        self.assertIn("66 strength rows remain blank", human)
+        self.assertIn("168 strength rows remain blank", human)
         self.assertIn("No inter-human agreement estimate is available", human)
+        self.assertIn("No human labels cover type B", human)
 
-    def test_editable_document_embeds_figure_and_tables(self):
+    def test_editable_document_embeds_figures_and_tables(self):
         self.assertTrue(DOCX.is_file())
         with ZipFile(DOCX) as archive:
             self.assertIsNone(archive.testzip())
             names = set(archive.namelist())
             self.assertIn("word/media/headline.png", names)
+            self.assertIn("word/media/headline_B_fact.png", names)
             self.assertIn("word/styles.xml", names)
             document = ElementTree.fromstring(archive.read("word/document.xml"))
             styles = ElementTree.fromstring(archive.read("word/styles.xml"))
             self.assertIsNotNone(styles)
             ns = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
             text = "".join(t.text or "" for t in document.findall(".//w:t", ns))
-            self.assertEqual(text.count(PLACEHOLDER), 1)
+            self.assertNotIn("PLACEHOLDER", text)
             self.assertIn("github.com/KA-1205/BackDown", text)
-            self.assertEqual(len(document.findall(".//w:tbl", ns)), 3)
+            self.assertIn("3.887", text)
+            self.assertEqual(len(document.findall(".//w:tbl", ns)), 4)
+            self.assertEqual(len(document.findall(".//w:drawing", ns)), 2)
 
 
 if __name__ == "__main__":
