@@ -2,7 +2,7 @@
 
 **Authors:** Kartik Arora, Harshil Srivastav (thisisharshil@gmail.com), Daksh Goel (iamdaksh23@gmail.com)
 
-**Affiliations:** Kartik Arora — Department of Artificial Intelligence and Machine Learning, School of Engineering & Technology, Vivekananda Institute of Professional Studies – Technical Campus, AU-Block, Outer Ring Road, Pitampura, Delhi 110034, India. Harshil Srivastav and Daksh Goel — **TODO: affiliations.**
+**Affiliations:** Kartik Arora, Harshil Srivastav, and Daksh Goel — Department of Artificial Intelligence and Machine Learning, School of Engineering & Technology, Vivekananda Institute of Professional Studies – Technical Campus, AU-Block, Outer Ring Road, Pitampura, Delhi 110034, India.
 Research conducted at the AI x Epistemics Research Sprint, November 2026, with Apart Research.
 
 ## Abstract
