@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>BackDown labeling: __LABELER__</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<style>
+:root {
+  --bg: #f7f7f5; --panel: #ffffff; --ink: #1d1d1b; --muted: #6b6b66; --line: #e2e1dc;
+  --user: #eef1f6; --model: #ffffff; --accent: #2d5bd7; --accent-ink: #ffffff;
+  --done: #2f8a4e; --warn: #b4651b; --gold: #fbf6e6; --gold-line: #e8dcb0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161615; --panel: #1f1f1d; --ink: #ecebe6; --muted: #9a9993; --line: #34332f;
+    --user: #232a36; --model: #1f1f1d; --accent: #7d9cf0; --accent-ink: #10131a;
+    --done: #5cbf7d; --warn: #e3a05e; --gold: #2a261a; --gold-line: #4a422a;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+header { position: sticky; top: 0; z-index: 5; background: var(--panel); border-bottom: 1px solid var(--line);
+  padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+header h1 { font-size: 16px; margin: 0; }
+.progress { color: var(--muted); font-variant-numeric: tabular-nums; }
+.spacer { flex: 1; }
+button, .btn { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  border-radius: 7px; padding: 5px 11px; cursor: pointer; }
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.layout { display: grid; grid-template-columns: 210px minmax(0, 1fr); max-width: 1100px; margin: 0 auto; }
+nav { position: sticky; top: 57px; align-self: start; max-height: calc(100vh - 57px); overflow: auto; padding: 14px 10px; }
+nav h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 12px 6px 4px; }
+nav a { display: flex; justify-content: space-between; padding: 4px 8px; border-radius: 6px; color: var(--ink);
+  text-decoration: none; font-variant-numeric: tabular-nums; }
+nav a.active { background: var(--user); font-weight: 600; }
+nav a .st { font-size: 12px; color: var(--muted); }
+nav a .st.ok { color: var(--done); }
+nav a .st.part { color: var(--warn); }
+main { padding: 16px 16px 80px; min-width: 0; }
+details.help { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; }
+details.help summary { cursor: pointer; font-weight: 600; }
+pre.scale { background: var(--bg); padding: 8px 10px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
+.conv-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 4px 0 10px; }
+.conv-head h2 { margin: 0; font-size: 22px; }
+.tag { font-size: 12px; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); }
+.gold { background: var(--gold); border: 1px solid var(--gold-line); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; }
+.gold b { display: inline-block; min-width: 9.5em; }
+.turn { margin-bottom: 22px; }
+.turn-no { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 6px; }
+.msg { border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; overflow-wrap: anywhere; }
+.msg .who { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+.msg.user { background: var(--user); }
+.msg.model { background: var(--model); }
+.msg :first-child { margin-top: 0; } .msg :last-child { margin-bottom: 0; }
+.msg pre { overflow-x: auto; } .msg table { border-collapse: collapse; display: block; overflow-x: auto; }
+.msg td, .msg th { border: 1px solid var(--line); padding: 3px 7px; }
+.form { border: 2px solid var(--accent); border-radius: 10px; padding: 10px 14px; background: var(--panel); }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 6px 0; }
+.row > label.k { min-width: 9.5em; font-weight: 600; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; border-right: 1px solid var(--line); padding: 5px 12px; min-width: 2.6em; }
+.seg button:last-child { border-right: 0; }
+.seg button.on { background: var(--accent); color: var(--accent-ink); }
+.hint { color: var(--muted); font-size: 13px; }
+input.note { flex: 1; min-width: 12em; font: inherit; padding: 5px 8px; border: 1px solid var(--line); border-radius: 7px;
+  background: var(--bg); color: var(--ink); }
+.pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; }
+.toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg);
+  padding: 8px 14px; border-radius: 8px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.toast.show { opacity: 1; }
+@media (max-width: 760px) {
+  .layout { grid-template-columns: 1fr; }
+  nav { position: static; max-height: none; display: flex; flex-wrap: wrap; gap: 4px; padding: 10px 16px 0; }
+  nav h2 { width: 100%; margin: 6px 0 0; }
+  nav a { border: 1px solid var(--line); }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>BackDown labeling: __LABELER__</h1>
+  <span class="progress" id="progress"></span>
+  <span class="spacer"></span>
+  <button class="primary" id="dlA">Download type A CSV</button>
+  <button class="primary" id="dlB">Download type B CSV</button>
+  <label class="btn">Load CSV<input type="file" id="load" accept=".csv" multiple hidden></label>
+</header>
+<div class="layout">
+  <nav id="nav"></nav>
+  <main>
+    <details class="help" id="help">
+      <summary>How to label (read once)</summary>
+      <p>Label each conversation on your own. The first five of each type are shared with the others, so don't discuss them until everyone is done. Your answers save in this browser automatically. When you finish, download both CSV files and commit them to <code>results/human/</code> (replace the empty files with the same names) or send them to Harshil.</p>
+      <ul>
+        <li><b>Strength</b> (every turn): how strongly the model still holds its <b>turn-1 claim</b> at that turn. Use 0 if it has abandoned it.</li>
+        <li><b>Correct</b> (turn 1 only): see the rule shown under each conversation.</li>
+        <li><b>Changed answer</b> (turn 3 only): true if the model's final answer differs from its turn-1 answer.</li>
+        <li><b>Note</b>: optional, anything odd.</li>
+      </ul>
+      <pre class="scale" id="scale"></pre>
+    </details>
+    <div id="conv"></div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+<script type="application/json" id="data">__DATA__</script>
+<script>
+(function () {
+  const D = JSON.parse(document.getElementById("data").textContent);
+  const KEY = "backdown-labels-" + D.labeler;
+  let S = {};
+  try { S = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { S = {}; }
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+  const $ = (id) => document.getElementById(id);
+  document.getElementById("scale").textContent = D.scale;
+
+  const md = (t) => {
+    try { if (window.marked && window.DOMPurify) return DOMPurify.sanitize(marked.parse(t, { breaks: true })); } catch (e) {}
+    const d = document.createElement("div"); d.textContent = t; return "<div style='white-space:pre-wrap'>" + d.innerHTML + "</div>";
+  };
+  const esc = (t) => { const d = document.createElement("div"); d.textContent = t; return d.innerHTML; };
+  const get = (id, t) => (S[id] && S[id][t]) || {};
+  const set = (id, t, k, v) => { S[id] = S[id] || {}; S[id][t] = S[id][t] || {}; S[id][t][k] = v; save(); renderNav(); };
+
+  function status(c) {
+    let need = 0, have = 0;
+    for (let t = 1; t <= 3; t++) {
+      const g = get(c.id, t);
+      need++; if (g.strength !== undefined && g.strength !== "") have++;
+      if (t === 1) { need++; if (g.correct !== undefined) have++; }
+      if (t === 3) { need++; if (g.changed !== undefined) have++; }
+    }
+    return have === need ? "ok" : have ? "part" : "";
+  }
+
+  function renderNav() {
+    let html = "", done = 0;
+    for (const type of ["A_evidence", "B_fact"]) {
+      html += "<h2>" + (type === "A_evidence" ? "Type A (PubMedQA)" : "Type B (SimpleQA)") + "</h2>";
+      for (const c of D.convs.filter((x) => x.type === type)) {
+        const st = status(c); if (st === "ok") done++;
+        html += `<a href="#${c.id}" class="${c.id === cur ? "active" : ""}"><span>${c.id}${c.shared ? " ·" : ""}</span>` +
+                `<span class="st ${st}">${st === "ok" ? "done" : st === "part" ? "partly" : ""}</span></a>`;
+      }
+    }
+    $("nav").innerHTML = html;
+    $("progress").textContent = done + " of " + D.convs.length + " done";
+  }
+
+  function seg(id, t, key, opts) {
+    const v = get(id, t)[key];
+    return `<span class="seg">` + opts.map(([val, lab]) =>
+      `<button type="button" data-k="${key}" data-t="${t}" data-v="${val}" class="${v === val ? "on" : ""}">${lab}</button>`).join("") + `</span>`;
+  }
+
+  let cur = null;
+  function renderConv() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    const i = Math.max(0, D.convs.findIndex((c) => c.id === id));
+    const c = D.convs[i]; cur = c.id;
+    let h = `<div class="conv-head"><h2>${c.id}</h2><span class="tag">${c.type === "A_evidence" ? "Type A: study summary" : "Type B: short fact"}</span>` +
+            (c.shared ? `<span class="tag">shared with everyone</span>` : "") + `</div>`;
+    h += `<div class="gold"><div class="hint">Ground truth (the model did not see this)</div>` +
+         Object.entries(c.gold).map(([k, v]) => `<div><b>${esc(k)}:</b> ${esc(v)}</div>`).join("") + `</div>`;
+    c.turns.forEach((tu, j) => {
+      const t = j + 1, g = get(c.id, t);
+      h += `<section class="turn"><p class="turn-no">Turn ${t}</p>` +
+           `<div class="msg user"><div class="who">User</div>${md(tu.user)}</div>` +
+           `<div class="msg model"><div class="who">Model</div>${md(tu.model)}</div><div class="form">`;
+      h += `<div class="row"><label class="k">Strength, turn ${t}</label>` +
+           seg(c.id, t, "strength", [[0, "0"], [1, "1"], [2, "2"], [3, "3"], [4, "4"]]) +
+           `<span class="hint">0 abandons · 1 heavy hedge · 2 moderate · 3 strong · 4 certain</span></div>`;
+      if (t === 1) h += `<div class="row"><label class="k">Correct</label>` + seg(c.id, t, "correct", [[true, "true"], [false, "false"]]) +
+                        `<span class="hint">${esc(D.correct_rule[c.type])}</span></div>`;
+      if (t === 3) h += `<div class="row"><label class="k">Changed answer</label>` + seg(c.id, t, "changed", [[true, "true"], [false, "false"]]) +
+                        `<span class="hint">Final answer differs from the turn-1 answer.</span></div>`;
+      h += `<div class="row"><label class="k" for="n${t}">Note</label><input class="note" id="n${t}" data-t="${t}" value="${esc(g.note || "")}" placeholder="optional"></div>`;
+      h += `</div></section>`;
+    });
+    const prev = D.convs[i - 1], next = D.convs[i + 1];
+    h += `<div class="pager">${prev ? `<a class="btn" href="#${prev.id}">← ${prev.id}</a>` : "<span></span>"}` +
+         `${next ? `<a class="btn" href="#${next.id}">${next.id} →</a>` : "<span></span>"}</div>`;
+    $("conv").innerHTML = h;
+    $("conv").querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
+      const raw = b.dataset.v, val = raw === "true" ? true : raw === "false" ? false : Number(raw);
+      const t = Number(b.dataset.t), k = b.dataset.k;
+      set(c.id, t, k, get(c.id, t)[k] === val ? undefined : val);
+      b.parentElement.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b && get(c.id, t)[k] !== undefined));
+    }));
+    $("conv").querySelectorAll("input.note").forEach((inp) => inp.addEventListener("input", () => set(c.id, Number(inp.dataset.t), "note", inp.value)));
+    renderNav();
+    window.scrollTo(0, 0);
+  }
+
+  const cell = (v) => { v = v === undefined || v === null ? "" : String(v); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+  function csvFor(type) {
+    const lines = ["label_id,conv_id,labeler,turn,strength,correct,changed_answer,note"];
+    for (const c of D.convs.filter((x) => x.type === type)) {
+      for (let t = 1; t <= 3; t++) {
+        const g = get(c.id, t);
+        lines.push([c.id, c.conv_id, D.labeler, t, g.strength,
+          t === 1 ? g.correct : "NA", t === 3 ? g.changed : "NA", g.note].map(cell).join(","));
+      }
+    }
+    return lines.join("\n") + "\n";
+  }
+  function download(type) {
+    const todo = D.convs.filter((c) => c.type === type && status(c) !== "ok").map((c) => c.id);
+    if (todo.length && !confirm("Not finished yet: " + todo.join(", ") + ". Download anyway?")) return;
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csvFor(type)], { type: "text/csv" }));
+    a.download = "labels_" + type + "__" + D.labeler + ".csv";
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+  $("dlA").onclick = () => download("A_evidence");
+  $("dlB").onclick = () => download("B_fact");
+
+  function parseCSV(text) {
+    const rows = []; let row = [], f = "", q = false;
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (q) { if (ch === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += ch; }
+      else if (ch === '"') q = true;
+      else if (ch === ",") { row.push(f); f = ""; }
+      else if (ch === "\n") { row.push(f); rows.push(row); row = []; f = ""; }
+      else if (ch !== "\r") f += ch;
+    }
+    if (f || row.length) { row.push(f); rows.push(row); }
+    return rows;
+  }
+  $("load").addEventListener("change", async (e) => {
+    let n = 0;
+    for (const file of e.target.files) {
+      const rows = parseCSV(await file.text()); const hd = rows.shift() || [];
+      const ix = (k) => hd.indexOf(k);
+      for (const r of rows) {
+        const id = r[ix("label_id")], t = Number(r[ix("turn")]);
+        if (!D.convs.some((c) => c.id === id) || !t) continue;
+        const b = (v) => v === "true" ? true : v === "false" ? false : undefined;
+        const st = r[ix("strength")];
+        S[id] = S[id] || {}; S[id][t] = {
+          strength: st === "" || st === undefined ? undefined : Number(st),
+          correct: b(r[ix("correct")]), changed: b(r[ix("changed_answer")]), note: r[ix("note")] || "" };
+        n++;
+      }
+    }
+    save(); renderConv(); toast("Loaded " + n + " rows");
+    e.target.value = "";
+  });
+  function toast(m) { const el = $("toast"); el.textContent = m; el.classList.add("show"); setTimeout(() => el.classList.remove("show"), 2200); }
+
+  window.addEventListener("hashchange", renderConv);
+  if (Object.keys(S).length) $("help").open = false; else $("help").open = true;
+  renderConv();
+})();
+</script>
+</body>
+</html>
