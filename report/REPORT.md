@@ -1,8 +1,8 @@
 # BackDown: Comparing Initial and Defended Claim Strength Under Challenge
 
-**Authors:** Harshil, Daksh, Kartik — **TODO: confirm full names and author order.**
+**Authors:** Kartik Arora, Harshil Srivastav (thisisharshil@gmail.com), Daksh Goel (iamdaksh23@gmail.com)
 
-**Affiliations:** **TODO: each author to supply their affiliation.**
+**Affiliations:** Kartik Arora — Department of Artificial Intelligence and Machine Learning, School of Engineering & Technology, Vivekananda Institute of Professional Studies – Technical Campus, AU-Block, Outer Ring Road, Pitampura, Delhi 110034, India. Harshil Srivastav and Daksh Goel — **TODO: affiliations.**
 Research conducted at the AI x Epistemics Research Sprint, November 2026, with Apart Research.
 
 ## Abstract

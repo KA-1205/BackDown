@@ -34,7 +34,7 @@ notes.
 
 ## Pending human/orchestrator checks
 
-- Confirm full author names, author order, affiliations, and final manuscript approval. These remain TODO placeholders.
+- Confirm final author order and Harshil's and Daksh's affiliations; Kartik's name, email, and affiliation are now filled. Final manuscript approval also remains.
 - Check pagination, typography, table widths, and caption placement in the actual Google Doc/PDF. The local DOCX is editable but no Word/LibreOffice renderer is installed here, so visual pagination has **not** been checked against the template or the eight-page limit.
 - Complete further independent human grading and the CONTRACT-correctness sensitivity before finalizing interpretive claims. Kartik's 36 labels do not resolve either.
 - Add human labels for type B before making any type-B human-validation claim.
