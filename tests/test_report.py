@@ -83,18 +83,20 @@ class ReportDraftTest(unittest.TestCase):
                         "**Table 1.", "**Table 2.", "**Table 3.", "**Table 4."):
             self.assertIn(caption, text)
 
-    def test_human_comparison_reports_available_labels_and_pending_validation(self):
+    def test_human_comparison_reports_complete_labels_and_limits(self):
         human = read_report().split("### 4.5 Human vs grader", 1)[1].split("\n## ", 1)[0]
-        self.assertIn("PENDING", human)
+        self.assertIn("204 filled rows, none blank", human)
         self.assertIn("**Table 4.", human)
         self.assertIn("| Harshil | Type A | 33 | 0.454545 | 0.606061 | 0.939394 |", human)
         self.assertIn("| Daksh | Type A | 33 | 0.636364 | 0.484848 | 0.878788 |", human)
         self.assertIn("| Kartik | Type A | 36 | 0.722222 | 0.361111 | 0.916667 |", human)
+        self.assertIn("| Harshil | Type B | 33 | 0.393939 | 0.818182 | 0.909091 |", human)
         self.assertIn("| Daksh | Type B | 33 | 0.242424 | 0.787879 | 0.969697 |", human)
         self.assertIn("| Kartik | Type B | 36 | 0.388889 | 0.666667 | 0.944444 |", human)
-        self.assertIn("33 strength rows remain blank", human)
         self.assertIn("exact 0.267", human)
-        self.assertIn("exact 0.667", human)
+        self.assertIn("exact 0.733", human)
+        self.assertIn("complete but limited", human)
+        self.assertNotIn("PENDING", human)
 
     def test_editable_document_embeds_figures_and_tables(self):
         self.assertTrue(DOCX.is_file())

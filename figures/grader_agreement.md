@@ -24,7 +24,7 @@ See `grader_disagreements.csv` for grader strengths.
 
 ## Human-vs-grader comparison
 
-Filled rows: 171; blank rows: 33; invalid strengths: 0; unmatched conv_id/turn: 0.
+Filled rows: 204; blank rows: 0; invalid strengths: 0; unmatched conv_id/turn: 0.
 
 Each human row is one comparison; missing grader scores are excluded.
 Combined strength is the median of available grader scores.
@@ -33,22 +33,22 @@ Combined strength is the median of available grader scores.
 
 | Turn | Comparison | n | MAE | Exact | Within-1 |
 | --- | --- | ---: | ---: | ---: | ---: |
-| All | combined | 171 | 0.491228 | 0.578947 | 0.929825 |
-| All | claude_haiku | 171 | 0.491228 | 0.578947 | 0.935673 |
-| All | codex | 171 | 0.526316 | 0.561404 | 0.923977 |
-| All | glm | 171 | 0.614035 | 0.543860 | 0.894737 |
-| 1 | combined | 57 | 0.368421 | 0.666667 | 0.964912 |
-| 1 | claude_haiku | 57 | 0.385965 | 0.649123 | 0.964912 |
-| 1 | codex | 57 | 0.421053 | 0.596491 | 0.982456 |
-| 1 | glm | 57 | 0.421053 | 0.631579 | 0.947368 |
-| 2 | combined | 57 | 0.578947 | 0.491228 | 0.929825 |
-| 2 | claude_haiku | 57 | 0.596491 | 0.473684 | 0.929825 |
-| 2 | codex | 57 | 0.596491 | 0.508772 | 0.912281 |
-| 2 | glm | 57 | 0.596491 | 0.491228 | 0.912281 |
-| 3 | combined | 57 | 0.526316 | 0.578947 | 0.894737 |
-| 3 | claude_haiku | 57 | 0.491228 | 0.614035 | 0.912281 |
-| 3 | codex | 57 | 0.561404 | 0.578947 | 0.877193 |
-| 3 | glm | 57 | 0.824561 | 0.508772 | 0.824561 |
+| All | combined | 204 | 0.475490 | 0.617647 | 0.926471 |
+| All | claude_haiku | 204 | 0.475490 | 0.617647 | 0.931373 |
+| All | codex | 204 | 0.504902 | 0.602941 | 0.921569 |
+| All | glm | 204 | 0.622549 | 0.573529 | 0.887255 |
+| 1 | combined | 68 | 0.323529 | 0.705882 | 0.970588 |
+| 1 | claude_haiku | 68 | 0.338235 | 0.691176 | 0.970588 |
+| 1 | codex | 68 | 0.352941 | 0.661765 | 0.985294 |
+| 1 | glm | 68 | 0.382353 | 0.661765 | 0.955882 |
+| 2 | combined | 68 | 0.500000 | 0.558824 | 0.941176 |
+| 2 | claude_haiku | 68 | 0.514706 | 0.544118 | 0.941176 |
+| 2 | codex | 68 | 0.529412 | 0.558824 | 0.926471 |
+| 2 | glm | 68 | 0.514706 | 0.558824 | 0.926471 |
+| 3 | combined | 68 | 0.602941 | 0.588235 | 0.867647 |
+| 3 | claude_haiku | 68 | 0.573529 | 0.617647 | 0.882353 |
+| 3 | codex | 68 | 0.632353 | 0.588235 | 0.852941 |
+| 3 | glm | 68 | 0.970588 | 0.500000 | 0.779412 |
 
 ### A_evidence (combined; filled 102, blank 0)
 
@@ -59,14 +59,14 @@ Combined strength is the median of available grader scores.
 | 2 | combined | 34 | 0.647059 | 0.411765 | 0.941176 |
 | 3 | combined | 34 | 0.705882 | 0.441176 | 0.852941 |
 
-### B_fact (combined; filled 69, blank 33)
+### B_fact (combined; filled 102, blank 0)
 
 | Turn | Comparison | n | MAE | Exact | Within-1 |
 | --- | --- | ---: | ---: | ---: | ---: |
-| All | combined | 69 | 0.318841 | 0.724638 | 0.956522 |
-| 1 | combined | 23 | 0.217391 | 0.782609 | 1.000000 |
-| 2 | combined | 23 | 0.478261 | 0.608696 | 0.913043 |
-| 3 | combined | 23 | 0.260870 | 0.782609 | 0.956522 |
+| All | combined | 102 | 0.343137 | 0.754902 | 0.941176 |
+| 1 | combined | 34 | 0.176471 | 0.823529 | 1.000000 |
+| 2 | combined | 34 | 0.352941 | 0.705882 | 0.941176 |
+| 3 | combined | 34 | 0.500000 | 0.735294 | 0.882353 |
 
 ### By labeler and type (combined)
 
@@ -75,6 +75,7 @@ Combined strength is the median of available grader scores.
 | daksh | A_evidence | 33 | 0.636364 | 0.484848 | 0.878788 |
 | daksh | B_fact | 33 | 0.242424 | 0.787879 | 0.969697 |
 | harshil | A_evidence | 33 | 0.454545 | 0.606061 | 0.939394 |
+| harshil | B_fact | 33 | 0.393939 | 0.818182 | 0.909091 |
 | kartik | A_evidence | 36 | 0.722222 | 0.361111 | 0.916667 |
 | kartik | B_fact | 36 | 0.388889 | 0.666667 | 0.944444 |
 
@@ -85,4 +86,4 @@ Only turns scored by two or more labelers contribute.
 | Type | Pairs | Conversations | MAE | Exact | Within-1 |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | A_evidence | 45 | 5 | 0.977778 | 0.266667 | 0.755556 |
-| B_fact | 15 | 5 | 0.333333 | 0.666667 | 1.000000 |
+| B_fact | 45 | 5 | 0.266667 | 0.733333 | 1.000000 |
