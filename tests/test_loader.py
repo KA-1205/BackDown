@@ -107,6 +107,19 @@ class LoaderTests(unittest.TestCase):
         self.assertEqual([r["conv_id"] for r in explicit["records"]],
                          ["ablation", "mixed-ablation"])
 
+    def test_default_run_uses_seed_one_only(self):
+        self.write("A_evidence__x__seed1.jsonl", [record("seed-one")])
+        self.write("A_evidence__x__seed2.jsonl", [record("seed-two", seed=2)])
+        self.write("mixed.jsonl", [record("mixed-two", seed=2), record("mixed-one", seed=1)])
+        first = load_graded(self.path)
+        self.assertEqual([r["conv_id"] for r in first["records"]],
+                         ["mixed-one", "seed-one"])
+        self.assertEqual(len(first["files_read"]), 2)
+        second = load_graded(self.path, seed=2)
+        self.assertEqual([r["conv_id"] for r in second["records"]],
+                         ["mixed-two", "seed-two"])
+        self.assertEqual(len(second["files_read"]), 2)
+
     def test_cli_creates_empty_output_and_stable_no_data_summary(self):
         self.write("a.jsonl", [record()])
         output = self.path / "output"

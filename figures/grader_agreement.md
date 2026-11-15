@@ -8,23 +8,23 @@ NA denotes no eligible data.
 
 | Turn | Units | Pairs | Exact | Within-1 | Ordinal alpha |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| 1 | 640 | 1920 | 0.685417 | 0.983854 | 0.522171 |
-| 2 | 640 | 1920 | 0.654687 | 0.977604 | 0.757114 |
-| 3 | 640 | 1920 | 0.593229 | 0.933333 | 0.764069 |
+| 1 | 1280 | 3840 | 0.797396 | 0.985156 | 0.836139 |
+| 2 | 1280 | 3840 | 0.750781 | 0.974219 | 0.878663 |
+| 3 | 1280 | 3840 | 0.681771 | 0.902865 | 0.762354 |
 
 ## Disagreements
 
-Total record-turns with spread >= 2: 132.
+Total record-turns with spread >= 2: 308.
 
-- Turn 1: 21
-- Turn 2: 27
-- Turn 3: 84
+- Turn 1: 37
+- Turn 2: 60
+- Turn 3: 211
 
 See `grader_disagreements.csv` for grader strengths.
 
 ## Human-vs-grader comparison
 
-Filled rows: 36; blank rows: 66; invalid strengths: 0; unmatched conv_id/turn: 0.
+Filled rows: 36; blank rows: 168; invalid strengths: 0; unmatched conv_id/turn: 0.
 
 Each human row is one comparison; missing grader scores are excluded.
 Combined strength is the median of available grader scores.

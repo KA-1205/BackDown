@@ -5,6 +5,7 @@ import csv
 import json
 import math
 import random
+import re
 import zlib
 from pathlib import Path
 from statistics import mean, median
@@ -392,7 +393,7 @@ def write_metrics_markdown(rows, out_dir):
     return path
 
 
-def write_headline_figure(rows, out_dir, kind="A_evidence"):
+def write_headline_figure(rows, out_dir, kind="A_evidence", filename=None):
     """Plot one type's independent discrimination against pooled overselling."""
     import matplotlib
     matplotlib.use("Agg")
@@ -408,7 +409,7 @@ def write_headline_figure(rows, out_dir, kind="A_evidence"):
             or (row["metric"] == "discrimination"
                 and row["pushback"] == "warranted_minus_unwarranted"))
     }
-    path = Path(out_dir) / "headline.png"
+    path = Path(out_dir) / (filename or f"headline_{kind}.png")
     path.parent.mkdir(parents=True, exist_ok=True)
     with plt.rc_context({"font.family": "DejaVu Sans", "font.size": 9}):
         fig, ax = plt.subplots(figsize=(8, 6))
@@ -477,13 +478,21 @@ def write_headline_figure(rows, out_dir, kind="A_evidence"):
     return path
 
 
-def load_graded(path, variant="natural"):
-    """Read one variant from immediate *.jsonl children; latest success wins.
+def _file_seed(name):
+    """Return the seed encoded as __seed<N> in a filename, or None."""
+    match = re.search(r"__seed(\d+)(?:__|\.jsonl$)", name)
+    return int(match.group(1)) if match else None
 
-    Blank lines are ignored. Invalid JSON or non-record JSON is counted as
-    malformed. Duplicate counts exclude error lines. Condition keys are
-    (stakes: bool, pushback: str); all coverage counts follow deduplication.
-    Older records with no variant are treated as natural.
+
+def load_graded(path, variant="natural", seed=1):
+    """Read one variant and seed from immediate *.jsonl children.
+
+    Latest successful record wins. Blank lines are ignored. Invalid JSON or
+    non-record JSON is counted as malformed. Duplicate counts exclude error
+    lines. Condition keys are (stakes: bool, pushback: str); all coverage
+    counts follow deduplication. Older records with no variant or seed are
+    treated as natural seed 1. Explicit-confidence ablation files are excluded
+    from the natural run.
     """
     result = {
         "records": [], "by_type": {}, "by_model": {}, "by_condition": {},
@@ -495,6 +504,8 @@ def load_graded(path, variant="natural"):
         if not file.is_file():
             continue
         if variant == "natural" and file.name.endswith("__explicit_confidence.jsonl"):
+            continue
+        if _file_seed(file.name) not in (None, seed):
             continue
         result["files_read"].append(str(file))
         with file.open(encoding="utf-8") as stream:
@@ -510,6 +521,8 @@ def load_graded(path, variant="natural"):
                         continue
                     condition = row.get("condition")
                     if isinstance(condition, dict) and condition.get("variant", "natural") != variant:
+                        continue
+                    if row.get("seed", 1) != seed:
                         continue
                     if (
                         not all(isinstance(row.get(key), str) and row[key]
@@ -730,8 +743,10 @@ def main(argv=None):
     parser.add_argument("--human", default=Path("results/human"), type=Path)
     parser.add_argument("--variant", default="natural",
                         help="conversation variant to analyze (default: natural)")
+    parser.add_argument("--seed", default=1, type=int,
+                        help="conversation seed to analyze (default: 1)")
     args = parser.parse_args(argv)
-    result = load_graded(args.input_dir, variant=args.variant)
+    result = load_graded(args.input_dir, variant=args.variant, seed=args.seed)
     items = {}
     for kind in sorted(result["by_type"]):
         items.update(load_items(args.items, kind))
@@ -741,7 +756,12 @@ def main(argv=None):
     # Preserve the metrics-only CLI output for inputs with no strength scores.
     if any(_strengths(record, turn) for record in result["records"] for turn in (1, 2, 3)):
         print(f"output: {write_metrics_markdown(rows, args.out)}")
-        print(f"output: {write_headline_figure(rows, args.out)}")
+        available = sorted(set(result["by_type"]))
+        if not available:
+            available = ["A_evidence"]
+        for kind in available:
+            filename = "headline.png" if kind == "A_evidence" else f"headline_{kind}.png"
+            print(f"output: {write_headline_figure(rows, args.out, kind=kind, filename=filename)}")
         agreement = grader_agreement(result["records"])
         human = compare_human(result["records"], args.human)
         paths = write_agreement_reports(agreement, human, args.out)
