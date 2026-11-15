@@ -19,7 +19,7 @@
   },
   "subjects": {
     "gemini_lite":   [{"provider": "gemini", "model": "gemini-3.5-flash-lite"}, {"provider": "freellmapi", "model": "gemini-3.5-flash-lite"}, {"provider": "gemini2", "model": "gemini-3.5-flash-lite"}],
-    "mistral_large": [{"provider": "mistral", "model": "mistral-large-2512"}, {"provider": "freellmapi", "model": "mistral-large-3"}],
+    "mistral_large": [{"provider": "mistral", "model": "mistral-large-2512"}, {"provider": "freellmapi", "model": "mistral-large-2512"}],
     "gpt_oss":       [{"provider": "openrouter", "model": "openai/gpt-oss-120b", "extra": {"provider": {"sort": "price"}, "reasoning": {"effort": "medium"}}}, {"provider": "groq", "model": "openai/gpt-oss-120b"}, {"provider": "groq2", "model": "openai/gpt-oss-120b"}],
     "nemotron":      [{"provider": "nvidia", "model": "nvidia/nemotron-3-ultra-550b-a55b"}]
   },
