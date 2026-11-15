@@ -24,7 +24,7 @@ See `grader_disagreements.csv` for grader strengths.
 
 ## Human-vs-grader comparison
 
-Filled rows: 105; blank rows: 99; invalid strengths: 0; unmatched conv_id/turn: 0.
+Filled rows: 171; blank rows: 33; invalid strengths: 0; unmatched conv_id/turn: 0.
 
 Each human row is one comparison; missing grader scores are excluded.
 Combined strength is the median of available grader scores.
@@ -33,45 +33,47 @@ Combined strength is the median of available grader scores.
 
 | Turn | Comparison | n | MAE | Exact | Within-1 |
 | --- | --- | ---: | ---: | ---: | ---: |
-| All | combined | 105 | 0.523810 | 0.542857 | 0.933333 |
-| All | claude_haiku | 105 | 0.495238 | 0.561905 | 0.942857 |
-| All | codex | 105 | 0.600000 | 0.504762 | 0.904762 |
-| All | glm | 105 | 0.580952 | 0.552381 | 0.923810 |
-| 1 | combined | 35 | 0.428571 | 0.600000 | 0.971429 |
-| 1 | claude_haiku | 35 | 0.400000 | 0.628571 | 0.971429 |
-| 1 | codex | 35 | 0.542857 | 0.485714 | 0.971429 |
-| 1 | glm | 35 | 0.400000 | 0.628571 | 0.971429 |
-| 2 | combined | 35 | 0.485714 | 0.571429 | 0.942857 |
-| 2 | claude_haiku | 35 | 0.514286 | 0.542857 | 0.942857 |
-| 2 | codex | 35 | 0.542857 | 0.542857 | 0.914286 |
-| 2 | glm | 35 | 0.485714 | 0.571429 | 0.942857 |
-| 3 | combined | 35 | 0.657143 | 0.457143 | 0.885714 |
-| 3 | claude_haiku | 35 | 0.571429 | 0.514286 | 0.914286 |
-| 3 | codex | 35 | 0.714286 | 0.485714 | 0.828571 |
-| 3 | glm | 35 | 0.857143 | 0.457143 | 0.857143 |
+| All | combined | 171 | 0.491228 | 0.578947 | 0.929825 |
+| All | claude_haiku | 171 | 0.491228 | 0.578947 | 0.935673 |
+| All | codex | 171 | 0.526316 | 0.561404 | 0.923977 |
+| All | glm | 171 | 0.614035 | 0.543860 | 0.894737 |
+| 1 | combined | 57 | 0.368421 | 0.666667 | 0.964912 |
+| 1 | claude_haiku | 57 | 0.385965 | 0.649123 | 0.964912 |
+| 1 | codex | 57 | 0.421053 | 0.596491 | 0.982456 |
+| 1 | glm | 57 | 0.421053 | 0.631579 | 0.947368 |
+| 2 | combined | 57 | 0.578947 | 0.491228 | 0.929825 |
+| 2 | claude_haiku | 57 | 0.596491 | 0.473684 | 0.929825 |
+| 2 | codex | 57 | 0.596491 | 0.508772 | 0.912281 |
+| 2 | glm | 57 | 0.596491 | 0.491228 | 0.912281 |
+| 3 | combined | 57 | 0.526316 | 0.578947 | 0.894737 |
+| 3 | claude_haiku | 57 | 0.491228 | 0.614035 | 0.912281 |
+| 3 | codex | 57 | 0.561404 | 0.578947 | 0.877193 |
+| 3 | glm | 57 | 0.824561 | 0.508772 | 0.824561 |
 
-### A_evidence (combined; filled 69, blank 33)
-
-| Turn | Comparison | n | MAE | Exact | Within-1 |
-| --- | --- | ---: | ---: | ---: | ---: |
-| All | combined | 69 | 0.594203 | 0.478261 | 0.927536 |
-| 1 | combined | 23 | 0.478261 | 0.565217 | 0.956522 |
-| 2 | combined | 23 | 0.478261 | 0.521739 | 1.000000 |
-| 3 | combined | 23 | 0.826087 | 0.347826 | 0.826087 |
-
-### B_fact (combined; filled 36, blank 66)
+### A_evidence (combined; filled 102, blank 0)
 
 | Turn | Comparison | n | MAE | Exact | Within-1 |
 | --- | --- | ---: | ---: | ---: | ---: |
-| All | combined | 36 | 0.388889 | 0.666667 | 0.944444 |
-| 1 | combined | 12 | 0.333333 | 0.666667 | 1.000000 |
-| 2 | combined | 12 | 0.500000 | 0.666667 | 0.833333 |
-| 3 | combined | 12 | 0.333333 | 0.666667 | 1.000000 |
+| All | combined | 102 | 0.607843 | 0.480392 | 0.911765 |
+| 1 | combined | 34 | 0.470588 | 0.588235 | 0.941176 |
+| 2 | combined | 34 | 0.647059 | 0.411765 | 0.941176 |
+| 3 | combined | 34 | 0.705882 | 0.441176 | 0.852941 |
+
+### B_fact (combined; filled 69, blank 33)
+
+| Turn | Comparison | n | MAE | Exact | Within-1 |
+| --- | --- | ---: | ---: | ---: | ---: |
+| All | combined | 69 | 0.318841 | 0.724638 | 0.956522 |
+| 1 | combined | 23 | 0.217391 | 0.782609 | 1.000000 |
+| 2 | combined | 23 | 0.478261 | 0.608696 | 0.913043 |
+| 3 | combined | 23 | 0.260870 | 0.782609 | 0.956522 |
 
 ### By labeler and type (combined)
 
 | Labeler | Type | n | MAE | Exact | Within-1 |
 | --- | --- | ---: | ---: | ---: | ---: |
+| daksh | A_evidence | 33 | 0.636364 | 0.484848 | 0.878788 |
+| daksh | B_fact | 33 | 0.242424 | 0.787879 | 0.969697 |
 | harshil | A_evidence | 33 | 0.454545 | 0.606061 | 0.939394 |
 | kartik | A_evidence | 36 | 0.722222 | 0.361111 | 0.916667 |
 | kartik | B_fact | 36 | 0.388889 | 0.666667 | 0.944444 |
@@ -82,4 +84,5 @@ Only turns scored by two or more labelers contribute.
 
 | Type | Pairs | Conversations | MAE | Exact | Within-1 |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| A_evidence | 15 | 5 | 1.000000 | 0.200000 | 0.800000 |
+| A_evidence | 45 | 5 | 0.977778 | 0.266667 | 0.755556 |
+| B_fact | 15 | 5 | 0.333333 | 0.666667 | 1.000000 |

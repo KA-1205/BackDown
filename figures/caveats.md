@@ -105,13 +105,14 @@ reshuffle. See `rotation_check.md` for the full table.
 
 ## 8. Human validation is incomplete
 
-Harshil has filled 33 type-A strength labels (11 conversations), and Kartik has
-filled 36 type-A plus 36 type-B labels (12 conversations each). The other three
-label files are blank: 99 strength rows in total (Daksh type A and type B, and
-Harshil type B). `grader_agreement.md` compares these labels with the model
-graders, split by labeler and type. Per-labeler combined MAE ranges from 0.389
-(Kartik type B) to 0.722 (Kartik type A); Harshil's type-A MAE is 0.455. On the
-15 type-A turns scored by both labelers, human-human strength agreement is MAE
-1.000 and exact 0.200 over 5 overlapping conversations. That preliminary
-estimate is too small and too partial to count as completed multi-labeler
+Harshil has filled 33 type-A labels (11 conversations), Daksh has filled 33
+type-A plus 33 type-B labels (11 conversations each), and Kartik has filled 36
+type-A plus 36 type-B labels (12 conversations each). Only Harshil's type-B file
+is blank: 33 strength rows. `grader_agreement.md` compares these labels with the
+model graders, split by labeler and type. Per-labeler combined MAE ranges from
+0.242 (Daksh type B) to 0.722 (Kartik type A), with type-A values of 0.455
+(Harshil), 0.636 (Daksh), and 0.722 (Kartik). Where labelers scored the same
+turns, human-human exact agreement is 0.267 on type A (45 pairs, 5
+conversations) and 0.667 on type B (15 pairs, 5 conversations). Those overlaps
+are still too small and too partial to count as completed multi-labeler
 validation.

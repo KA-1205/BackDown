@@ -88,11 +88,13 @@ class ReportDraftTest(unittest.TestCase):
         self.assertIn("PENDING", human)
         self.assertIn("**Table 4.", human)
         self.assertIn("| Harshil | Type A | 33 | 0.454545 | 0.606061 | 0.939394 |", human)
+        self.assertIn("| Daksh | Type A | 33 | 0.636364 | 0.484848 | 0.878788 |", human)
         self.assertIn("| Kartik | Type A | 36 | 0.722222 | 0.361111 | 0.916667 |", human)
+        self.assertIn("| Daksh | Type B | 33 | 0.242424 | 0.787879 | 0.969697 |", human)
         self.assertIn("| Kartik | Type B | 36 | 0.388889 | 0.666667 | 0.944444 |", human)
-        self.assertIn("99 strength rows remain blank", human)
-        self.assertIn("15 type-A turns scored by both labelers", human)
-        self.assertIn("exact 0.200", human)
+        self.assertIn("33 strength rows remain blank", human)
+        self.assertIn("exact 0.267", human)
+        self.assertIn("exact 0.667", human)
 
     def test_editable_document_embeds_figures_and_tables(self):
         self.assertTrue(DOCX.is_file())
