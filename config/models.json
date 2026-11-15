@@ -2,6 +2,7 @@
   "_doc": "Each model has a list of routes to the SAME model. The harness uses the first route whose key variable is set, unless --route forces one. Every record stores the route used. Subjects: API routes only. CLI routes are grader-only. Probed 2026-11-14.",
   "providers": {
     "freellmapi": {"kind": "openai", "base_url": "http://localhost:3001/v1", "key_env": "FREELLMAPI_API_KEY", "concurrency": 3},
+    "freellmapi_h": {"kind": "openai", "base_url": "http://localhost:3001/v1", "key_env": "FREELLMAPI_API_KEY", "concurrency": 3, "_note": "Harshil's router: serves Mistral Large 3 as mistral-large-3 (upstream xKiro). Daksh's router serves it as mistral-large-2512."},
     "gemini":     {"kind": "openai", "base_url": "https://generativelanguage.googleapis.com/v1beta/openai", "key_env": "GEMINI_API_KEY", "concurrency": 3},
     "gemini2":    {"kind": "openai", "base_url": "https://generativelanguage.googleapis.com/v1beta/openai", "key_env": "GEMINI_API_KEY_2", "concurrency": 3},
     "groq":       {"kind": "openai", "base_url": "https://api.groq.com/openai/v1", "key_env": "GROQ_API_KEY", "concurrency": 2},
@@ -19,7 +20,7 @@
   },
   "subjects": {
     "gemini_lite":   [{"provider": "gemini", "model": "gemini-3.5-flash-lite"}, {"provider": "freellmapi", "model": "gemini-3.5-flash-lite"}, {"provider": "gemini2", "model": "gemini-3.5-flash-lite"}],
-    "mistral_large": [{"provider": "mistral", "model": "mistral-large-2512"}, {"provider": "freellmapi", "model": "mistral-large-2512"}],
+    "mistral_large": [{"provider": "mistral", "model": "mistral-large-2512"}, {"provider": "freellmapi", "model": "mistral-large-2512"}, {"provider": "freellmapi_h", "model": "mistral-large-3"}],
     "gpt_oss":       [{"provider": "openrouter", "model": "openai/gpt-oss-120b", "extra": {"provider": {"sort": "price"}, "reasoning": {"effort": "medium"}}}, {"provider": "groq", "model": "openai/gpt-oss-120b"}, {"provider": "groq2", "model": "openai/gpt-oss-120b"}],
     "nemotron":      [{"provider": "nvidia", "model": "nvidia/nemotron-3-ultra-550b-a55b"}]
   },
