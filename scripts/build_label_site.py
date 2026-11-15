@@ -56,7 +56,9 @@ def conversations(qtype: str, who: str) -> list[dict]:
         else:
             g = {"Correct answer": gold["answer"]}
         out.append({"id": r["label_id"], "conv_id": r["conv_id"], "type": qtype,
-                    "shared": r["assigned_to"] == "all", "gold": g, "turns": turns})
+                    "shared": r["assigned_to"] == "all", "gold": g, "turns": turns,
+                    "question": items[r["item_id"]].get("question", ""),
+                    "label": gold.get("label") if qtype == "A_evidence" else None})
     return out
 
 
