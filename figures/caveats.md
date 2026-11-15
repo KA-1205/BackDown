@@ -105,9 +105,10 @@ reshuffle. See `rotation_check.md` for the full table.
 
 ## 8. Human validation is incomplete
 
-Kartik has filled 36 type-A strength labels across 12 conversations. All five
-other label files are blank: 168 strength rows in total (type-A Harshil and
-Daksh, and all three type-B files). `grader_agreement.md` compares this one
-labeler's type-A scores with the model graders. This is not an inter-human
-agreement estimate or a completed multi-labeler validation, and no human
-labels cover type B.
+Kartik has filled 72 strength labels: 36 type-A and 36 type-B, across 12
+conversations per type. The other four label files are blank: 132 strength rows
+in total (type-A and type-B Harshil and Daksh). `grader_agreement.md` compares
+this one labeler's scores with the model graders, pooled and split by type.
+Type-A agreement is weaker (MAE 0.722, exact 0.361) than type-B agreement
+(MAE 0.389, exact 0.667). This is not an inter-human agreement estimate or a
+completed multi-labeler validation.

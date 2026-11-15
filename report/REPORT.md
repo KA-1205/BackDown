@@ -7,7 +7,7 @@ Research conducted at the AI x Epistemics Research Sprint, November 2026, with A
 
 ## Abstract
 
-An assistant can sound convincing initially yet weaken its answer when challenged. Separating responsiveness to evidence from responsiveness to disagreement requires measuring claim strength before and after both kinds of pressure. BackDown compares initial, neutrally probed, and defended claim strength across two 40-item sets: PubMedQA study summaries with weak or ambiguous evidence (type A) and short factual questions with single answers (type B). We analyze 1,280 conversations from four API-served models, each with two pushback and two stakes conditions, using median scores from three model graders. Type-A mean initial overselling ranges from 1.45 to 1.84 strength points without stakes and 1.28 to 1.56 with stakes; warranted-minus-unwarranted retreat is negative in every cell. Type-B overselling, defined as turn-1 strength on wrong answers, ranges from 3.44 to 3.89, and its discrimination contrast is positive in six of eight cells, with intervals excluding zero only for gpt-oss. A seed-2 wording rotation largely preserves type-A overselling, while type-A discrimination and capitulation are noisier. Pooled ordinal grader agreement ranges from 0.762 to 0.879 across turns. Against one author's 36 human strength labels, median grader scores show mean absolute error 0.722, exact agreement 0.361, and within-one agreement 0.917. This single-labeler comparison and further human grading remain pending. The results are descriptive and do not establish a model ranking.
+An assistant can sound convincing initially yet weaken its answer when challenged. Separating responsiveness to evidence from responsiveness to disagreement requires measuring claim strength before and after both kinds of pressure. BackDown compares initial, neutrally probed, and defended claim strength across two 40-item sets: PubMedQA study summaries with weak or ambiguous evidence (type A) and short factual questions with single answers (type B). We analyze 1,280 conversations from four API-served models, each with two pushback and two stakes conditions, using median scores from three model graders. Type-A mean initial overselling ranges from 1.45 to 1.84 strength points without stakes and 1.28 to 1.56 with stakes; warranted-minus-unwarranted retreat is negative in every cell. Type-B overselling, defined as turn-1 strength on wrong answers, ranges from 3.44 to 3.89, and its discrimination contrast is positive in six of eight cells, with intervals excluding zero only for gpt-oss. A seed-2 wording rotation largely preserves type-A overselling, while type-A discrimination and capitulation are noisier. Pooled ordinal grader agreement ranges from 0.762 to 0.879 across turns. Against one author's 72 human strength labels across both types, median grader scores show mean absolute error 0.556, exact agreement 0.514, and within-one agreement 0.931. This single-labeler comparison and further independent human grading remain pending. The results are descriptive and do not establish a model ranking.
 
 ## 1. Introduction
 
@@ -133,18 +133,20 @@ There are 308 conversation-turns with grader spread of at least two points: 37 i
 
 ### 4.5 Human vs grader
 
-Kartik has completed **36 human strength labels: 12 type-A conversations × three turns**, all from one author-labeler. Table 4 compares these final labels with the median of available model-grader strength scores. Each filled human turn row contributes one comparison; the 36 rows are repeated turns within 12 conversations, not 36 independent conversations. The regenerated comparison reports zero invalid strengths and zero unmatched conversation/turn identifiers.
+Kartik has completed **72 human strength labels: 12 type-A conversations plus 12 type-B conversations, each scored on three turns**, all from one author-labeler. Table 4 compares these final labels with the median of available model-grader strength scores. Each filled human turn row contributes one comparison; the 72 rows are repeated turns within 24 conversations, not 72 independent conversations. The regenerated comparison reports zero invalid strengths and zero unmatched conversation/turn identifiers.
 
-**Table 4. Kartik's final human strength labels versus combined grader strength.** MAE is mean absolute error in strength-scale points; exact and within-one agreement are proportions. Combined strength is the median of available grader scores. Source: the `combined` rows in the human-vs-grader section of `figures/grader_agreement.md`, using `results/human/labels_A_evidence__kartik.csv`.
+**Table 4. Kartik's final human strength labels versus combined grader strength, by type.** MAE is mean absolute error in strength-scale points; exact and within-one agreement are proportions. Combined strength is the median of available grader scores. Type-A and type-B rows use 12 conversations each; the pooled rows use all 24. Source: the pooled and per-type `combined` rows in the human-vs-grader section of `figures/grader_agreement.md`, using `results/human/labels_A_evidence__kartik.csv` and `results/human/labels_B_fact__kartik.csv`.
 
-| Turn | n | MAE | Exact agreement | Within one point |
-|---|---:|---:|---:|---:|
-| All turns | 36 | 0.722222 | 0.361111 | 0.916667 |
-| Initial | 12 | 0.583333 | 0.500000 | 0.916667 |
-| Neutral probe | 12 | 0.750000 | 0.250000 | 1.000000 |
-| Pushback | 12 | 0.833333 | 0.333333 | 0.833333 |
+| Group | Turn | n | MAE | Exact agreement | Within one point |
+|---|---|---:|---:|---:|---:|
+| Type A | All turns | 36 | 0.722222 | 0.361111 | 0.916667 |
+| Type B | All turns | 36 | 0.388889 | 0.666667 | 0.944444 |
+| All labels | All turns | 72 | 0.555556 | 0.513889 | 0.930556 |
+| All labels | Initial | 24 | 0.458333 | 0.583333 | 0.958333 |
+| All labels | Neutral probe | 24 | 0.625000 | 0.458333 | 0.916667 |
+| All labels | Pushback | 24 | 0.583333 | 0.500000 | 0.916667 |
 
-**PENDING — additional human labeling and multi-human validation.** This is a small selected sample, not an unbiased validation sample. Labeling assignments overlap across authors, but only Kartik's type-A labels are filled: **168 strength rows remain blank** across the other five label files (type-A Harshil and Daksh, and all three type-B files). No human labels cover type B. No inter-human agreement estimate is available. These results describe agreement with one author's judgments; they do not constitute completed independent multi-human validation or establish general grader validity.
+**PENDING — additional human labeling and multi-human validation.** This is a small selected sample, not an unbiased validation sample. Labeling assignments overlap across authors, but only Kartik's files are filled: **132 strength rows remain blank** across the other four label files (type-A and type-B Harshil and Daksh, 33 rows each). No inter-human agreement estimate is available. These results describe agreement with one author's judgments; they do not constitute completed independent multi-human validation or establish general grader validity.
 
 ## 5. Discussion and Limitations
 
@@ -156,7 +158,7 @@ There is a directional ambiguity in type-A overselling: graders score the model'
 
 The study is small, English-only, and built from two narrow item sets. One full seed does not demonstrate rotation robustness; the seed-2 check covers half the items, two graders, and no intervals. Stakes and other template wording can change together; separate conversations introduce generation variability. Grader consensus is not ground truth, and the bootstrap does not incorporate systematic grader bias. The report does not analyze the repository's separate explicit-confidence ablation or the planned consumer-chat comparison.
 
-Kartik's completed strength labels provide a limited human–grader comparison, but one author-labeler and a small selected sample do not establish independent multi-human validation. The remaining 168 blank strength rows leave inter-human agreement unestimated, and no human labels cover type B. Priority follow-ups are further independent, blind human grading, the CONTRACT-correctness sensitivity, direction-aligned scoring, evidence-relation stratification, and matched wording across seeds.
+Kartik's completed strength labels provide a limited human–grader comparison on both types, but one author-labeler and a small selected sample do not establish independent multi-human validation. The remaining 132 blank strength rows leave inter-human agreement unestimated. Priority follow-ups are further independent, blind human grading, the CONTRACT-correctness sensitivity, direction-aligned scoring, evidence-relation stratification, and matched wording across seeds.
 
 ## 6. Conclusion
 
@@ -183,7 +185,7 @@ The conversations show positive mapped overselling on both types: type-A answers
 
 ### Limitations and Dual-Use / Ethical Considerations
 
-**Measurement and scope.** Median aggregation cannot remove shared grader bias. Kartik's 36 completed type-A strength labels cover 12 selected conversations; this single-author comparison is limited by sample size, selection, and repeated turns. Assignments overlap, but 168 strength rows remain blank across the other five label files, so further human grading is pending and no inter-human agreement is estimated. No human labels cover type B. Label-to-strength mapping, claim orientation, and correctness definitions require sensitivity checks. English biomedical abstracts and heterogeneous trivia do not represent all factual or advisory interactions.
+**Measurement and scope.** Median aggregation cannot remove shared grader bias. Kartik's 72 completed strength labels cover 24 selected conversations (12 per type); this single-author comparison is limited by sample size, selection, and repeated turns. Assignments overlap, but 132 strength rows remain blank across the other four label files, so further human grading is pending and no inter-human agreement is estimated. Label-to-strength mapping, claim orientation, and correctness definitions require sensitivity checks. English biomedical abstracts and heterogeneous trivia do not represent all factual or advisory interactions.
 
 **Type-B limits.** Type-B overselling conditions on wrong answers, so each cell rests on 51 to 71 conversations rather than all 80. The items are a small, heterogeneous convenience set, and the warranted-evidence turn is a single checkable fact. Mistral's type-B runs changed router host between seeds, which confounds its rotation comparison. These features limit cross-domain and cross-provider generalization.
 
@@ -195,4 +197,4 @@ The conversations show positive mapped overselling on both types: type-A answers
 
 ## LLM Usage Statement
 
-GPT-6 Astra assisted with drafting and checking this report. Repository documentation describes agent-assisted implementation of the harness and analysis. For this draft, metric values and confidence intervals were reproduced from logged graded records, and cited paper titles, authors, and URLs were checked against primary sources. Author Kartik's final 36 type-A human strength labels were read for the comparison, and the human–grader estimates were taken from the regenerated `figures/grader_agreement.md`. Further human grading remains pending: 168 strength rows are blank across the other five label files, and no inter-human agreement estimate is available. Full author review and affiliation confirmation remain pending; this statement does not imply independent human verification.
+GPT-6 Astra assisted with drafting and checking this report. Repository documentation describes agent-assisted implementation of the harness and analysis. For this draft, metric values and confidence intervals were reproduced from logged graded records, and cited paper titles, authors, and URLs were checked against primary sources. Author Kartik's final 72 human strength labels (type A and type B) were read for the comparison, and the human–grader estimates were taken from the regenerated `figures/grader_agreement.md`. Further human grading remains pending: 132 strength rows are blank across the other four label files, and no inter-human agreement estimate is available. Full author review and affiliation confirmation remain pending; this statement does not imply independent human verification.

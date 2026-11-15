@@ -87,10 +87,11 @@ class ReportDraftTest(unittest.TestCase):
         human = read_report().split("### 4.5 Human vs grader", 1)[1].split("\n## ", 1)[0]
         self.assertIn("PENDING", human)
         self.assertIn("**Table 4.", human)
-        self.assertIn("| All turns | 36 | 0.722222 | 0.361111 | 0.916667 |", human)
-        self.assertIn("168 strength rows remain blank", human)
+        self.assertIn("| Type A | All turns | 36 | 0.722222 | 0.361111 | 0.916667 |", human)
+        self.assertIn("| Type B | All turns | 36 | 0.388889 | 0.666667 | 0.944444 |", human)
+        self.assertIn("| All labels | All turns | 72 | 0.555556 | 0.513889 | 0.930556 |", human)
+        self.assertIn("132 strength rows remain blank", human)
         self.assertIn("No inter-human agreement estimate is available", human)
-        self.assertIn("No human labels cover type B", human)
 
     def test_editable_document_embeds_figures_and_tables(self):
         self.assertTrue(DOCX.is_file())

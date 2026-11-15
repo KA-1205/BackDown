@@ -634,20 +634,48 @@ def _human_summary(differences):
     }
 
 
+def _human_result(differences, names):
+    return {
+        "turns": {
+            turn: {name: _human_summary(values) for name, values in entries.items()}
+            for turn, entries in differences.items()
+        },
+        "overall": {
+            name: _human_summary(
+                [value for turn in differences for value in differences[turn][name]])
+            for name in names
+        },
+    }
+
+
 def compare_human(records, human_dir):
-    """Read label rows independently; count blank, invalid and unmatched rows."""
+    """Read label rows independently; count blank, invalid and unmatched rows.
+
+    Results are pooled and also split by the type encoded in the label filename
+    (``labels_<type>__<labeler>.csv``).
+    """
     by_id = {record["conv_id"]: record for record in records}
     names = ("combined", *EXPECTED_GRADERS)
-    differences = {turn: {name: [] for name in names} for turn in (1, 2, 3)}
-    result = {"filled": 0, "blank": 0, "invalid": 0, "unmatched": 0}
+
+    def empty():
+        return {turn: {name: [] for name in names} for turn in (1, 2, 3)}
+
+    differences = empty()
+    by_type = {}
+    result = {"filled": 0, "blank": 0, "invalid": 0, "unmatched": 0,
+              "filled_by_type": {}, "blank_by_type": {}}
     for path in sorted(Path(human_dir).glob("labels_*.csv")):
+        kind = path.stem.split("__")[0].removeprefix("labels_")
+        type_differences = by_type.setdefault(kind, empty())
         with path.open(newline="", encoding="utf-8") as stream:
             for row in csv.DictReader(stream):
                 strength = (row.get("strength") or "").strip()
                 if not strength:
                     result["blank"] += 1
+                    result["blank_by_type"][kind] = result["blank_by_type"].get(kind, 0) + 1
                     continue
                 result["filled"] += 1
+                result["filled_by_type"][kind] = result["filled_by_type"].get(kind, 0) + 1
                 try:
                     strength = float(strength)
                 except ValueError:
@@ -666,14 +694,13 @@ def compare_human(records, human_dir):
                     continue
                 combined = combine_grades(record)["strength"][turn]
                 for name, score in {"combined": combined, **scores}.items():
-                    differences[turn][name].append(abs(strength - score))
-    result["turns"] = {
-        turn: {name: _human_summary(values) for name, values in entries.items()}
-        for turn, entries in differences.items()
-    }
-    result["overall"] = {
-        name: _human_summary([value for turn in differences for value in differences[turn][name]])
-        for name in names
+                    gap = abs(strength - score)
+                    differences[turn][name].append(gap)
+                    type_differences[turn][name].append(gap)
+    result.update(_human_result(differences, names))
+    result["by_type"] = {
+        kind: _human_result(type_differences, names)
+        for kind, type_differences in sorted(by_type.items())
     }
     return result
 
@@ -716,19 +743,31 @@ def write_agreement_reports(agreement, human, out_dir):
     if not human["filled"]:
         lines.append("No human labels yet.")
     else:
+        header = ["| Turn | Comparison | n | MAE | Exact | Within-1 |",
+                  "| --- | --- | ---: | ---: | ---: | ---: |"]
         lines.extend([
             f"Filled rows: {human['filled']}; blank rows: {human['blank']}; "
             f"invalid strengths: {human['invalid']}; unmatched conv_id/turn: {human['unmatched']}.",
             "", "Each human row is one comparison; missing grader scores are excluded.",
             "Combined strength is the median of available grader scores.", "",
-            "| Turn | Comparison | n | MAE | Exact | Within-1 |",
-            "| --- | --- | ---: | ---: | ---: | ---: |",
+            "### All labels", "", *header,
         ])
         for turn, entries in [("All", human["overall"]), *human["turns"].items()]:
             for name, row in entries.items():
                 if turn != "All" and not row["n"]:
                     continue
                 lines.append(f"| {turn} | {name} | {row['n']} | {_display(row['mae'])} | "
+                             f"{_display(row['exact'])} | {_display(row['within_1'])} |")
+        for kind, section in human.get("by_type", {}).items():
+            filled = human.get("filled_by_type", {}).get(kind, 0)
+            blank = human.get("blank_by_type", {}).get(kind, 0)
+            lines.extend(["", f"### {kind} (combined; filled {filled}, blank {blank})", "",
+                          *header])
+            for turn, entries in [("All", section["overall"]), *section["turns"].items()]:
+                row = entries["combined"]
+                if turn != "All" and not row["n"]:
+                    continue
+                lines.append(f"| {turn} | combined | {row['n']} | {_display(row['mae'])} | "
                              f"{_display(row['exact'])} | {_display(row['within_1'])} |")
     md_path = out_dir / "grader_agreement.md"
     md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")

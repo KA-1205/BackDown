@@ -15,7 +15,7 @@ notes.
 - Fetched the official sprint page and confirmed it names **MisleadBench** and **FlipRate** as the Track 1 example projects cited in the Introduction: https://apartresearch.com/sprints/ai-x-epistemics-research-sprint-2026-11-13-to-2026-11-15 . The page also links MASK, SycEval, and ELEPHANT, consistent with Related Work.
 - Recomputed all 200 rows of `figures/metrics_table.csv` (both types, 1,280 seed-1 records) from `results/graded/` and the item files using existing analysis functions **in memory**. Values, bootstrap bounds, record counts, and item counts match the committed CSV at absolute tolerance `1e-12`.
 - Recomputed grader-agreement values for both types pooled: 1,280 units and 3,840 pairs per turn; turn-1 exact 0.797396, within-1 0.985156, ordinal alpha 0.836139; turn-2 alpha 0.878663; turn-3 alpha 0.762354. Confirmed 308 record-turns with spread of at least two (37 initial, 60 probe, 211 pushback).
-- Recomputed the human–grader comparison from `results/human/labels_A_evidence__kartik.csv`: 36 filled strength rows over 12 conversations and three turns, zero invalid, zero unmatched. Combined-score rows: all turns n=36, MAE 0.722222, exact 0.361111, within-1 0.916667; per-turn n=12 matching Table 4.
+- Recomputed the human–grader comparison from `results/human/labels_A_evidence__kartik.csv` and `results/human/labels_B_fact__kartik.csv`: 72 filled strength rows (36 per type) over 24 conversations and three turns, zero invalid, zero unmatched. Pooled combined-score all-turn n=72, MAE 0.555556, exact 0.513889, within-1 0.930556. Per type: type A n=36, MAE 0.722222, exact 0.361111, within-1 0.916667; type B n=36, MAE 0.388889, exact 0.666667, within-1 0.944444. Per-turn pooled n=24, matching Table 4.
 - Confirmed the abstract is 225 words under the `\b[\w-]+\b` rule (150–250 required).
 - Confirmed the Results section carries Table 1 (type A), Table 2 (type B), Table 3 (grader agreement), and Table 4 (human vs grader), plus Figure 1 (type A) and Figure 2 (type B). The stale type-B placeholder and its `PLACEHOLDER` marker are gone.
 - Confirmed the seed-2 rotation subsection reports the `results/rotation_check.md` values and labels them a robustness check, not a replication. Recorded the Mistral type-B host confound (seed 1 and seed 2 used different router hosts).
@@ -28,7 +28,7 @@ notes.
 - `backdown/grade.py` defines initial correctness by stance/answer agreement; `docs/CONTRACT.md` also requires type-A strength within one point of supported strength. **The correctness-definition sensitivity analysis is not computed.** The report labels correctness-conditioned results provisional.
 - `figures/caveats.md` and the report note that strength grades refer to the model's main claim while the gold mapping is anchored to the affirmative question. This directional mismatch is an interpretation risk, not a measured correction.
 - Template selection depends on stakes and pushback condition, so conditions use separate conversations. Stakes contrasts are descriptive; they are not wording-controlled causal effects.
-- Human–grader results describe Kartik's completed type-A labels only: a small selected sample with repeated turns within 12 conversations, not independent multi-human validation. **168 strength rows remain blank** across the other five label files (type-A Harshil and Daksh, and all three type-B files). No human labels cover type B.
+- Human–grader results describe Kartik's completed labels on both types: a small selected sample with repeated turns within 24 conversations, not independent multi-human validation. **132 strength rows remain blank** across the other four label files (type-A and type-B Harshil and Daksh, 33 rows each).
 - Type-B overselling is a different construct from type-A overselling (mean turn-1 strength on wrong answers versus strength minus supported strength). The report does not compare the two as if they were the same scale.
 - The code repository link uses the configured `origin` remote, `https://github.com/KA-1205/BackDown.git`.
 
@@ -36,8 +36,8 @@ notes.
 
 - Confirm final author order and final manuscript approval. All three authors' names, emails, and shared affiliation are now filled.
 - Check pagination, typography, table widths, and caption placement in the actual Google Doc/PDF. The local DOCX is editable but no Word/LibreOffice renderer is installed here, so visual pagination has **not** been checked against the template or the eight-page limit.
-- Complete further independent human grading and the CONTRACT-correctness sensitivity before finalizing interpretive claims. Kartik's 36 labels do not resolve either.
-- Add human labels for type B before making any type-B human-validation claim.
+- Complete further independent human grading and the CONTRACT-correctness sensitivity before finalizing interpretive claims. Kartik's 72 labels do not resolve either.
+- Add Harshil's and Daksh's labels before making any inter-human agreement claim.
 - Confirm the required all-code-written-during-the-sprint provenance statement. The repository statement is supported by git history beginning 14 November 2026, but author confirmation is still appropriate before submission.
 - The report-drafting request named GPT-6 Astra (high) through a subagent dispatch; the provider returned HTTP 400, so the revision was completed in the orchestrating session. The `LLM Usage Statement` credits GPT-6 Astra with drafting and checking; authors should confirm that attribution before submitting.
 
